@@ -4,18 +4,23 @@
 #include "def.hpp"
 #include "container.hpp"
 
-/// An immutable, non-owning collection of data.
-template <typename Type>
-concept IsView = requires(Type p_view) {
-    IsCollection<Type>;
+namespace Ragine
+{
 
-    typename Type::CloneType;
-    IsContainer<typename Type::ContainerType>;
-    IsSameType<typename Type::ContainerType::KeyType, typename Type::KeyType>;
-    IsSameType<typename Type::ContainerType::ValueType, typename Type::ValueType>;
+    /// An immutable, non-owning collection of data.
+    template <typename Type>
+    concept IsView = requires(Type p_view) {
+        IsCollection<Type>;
 
-    { p_view[declval<typename Type::KeyType>()] } -> IsSameType<const typename Type::ValueType &>;
-    { p_view.clone() } -> IsSameType<typename Type::CloneType>;
-};
+        typename Type::CloneType;
+        IsContainer<typename Type::ContainerType>;
+        IsSameType<typename Type::ContainerType::KeyType, typename Type::KeyType>;
+        IsSameType<typename Type::ContainerType::ValueType, typename Type::ValueType>;
+
+        { p_view[declval<typename Type::KeyType>()] } -> IsSameType<const typename Type::ValueType &>;
+        { p_view.clone() } -> IsSameType<typename Type::CloneType>;
+    };
+
+} // namespace Ragine
 
 #endif // VIEW_HPP

@@ -3,10 +3,15 @@
 
 #include "list.hpp"
 
-template <typename Type, typename CharType = Char>
-concept IsText = requires {
-    IsList<Type>;
-    IsSameType<typename Type::ValueType, CharType>;
-};
+namespace Ragine
+{
+
+    template <typename Type, typename CharType = Char>
+    concept IsText = requires {
+        IsList<Type>;
+        IsSameType<typename Type::ValueType, CharType>;
+    };
+
+} // namespace Ragine
 
 #endif // TEXT_HPP

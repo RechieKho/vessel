@@ -3,9 +3,14 @@
 
 #include "def.hpp"
 
-template <typename Type>
-concept IsServer = requires {
-    { Type::get_instance() } -> IsSameType<Type &>;
-};
+namespace Ragine
+{
+
+    template <typename Type>
+    concept IsServer = requires {
+        { Type::get_instance() } -> IsSameType<Type &>;
+    };
+
+} // namespace Ragine
 
 #endif // SERVER_HPP

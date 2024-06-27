@@ -3,14 +3,19 @@
 
 #include "def.hpp"
 
-template <typename Type>
-concept IsArithmatical = requires(Type p_object) {
-    IsComparable<Type>;
+namespace Ragine
+{
 
-    { p_object + p_object } -> IsSameType<Type>;
-    { p_object - p_object } -> IsSameType<Type>;
-    { p_object *p_object } -> IsSameType<Type>;
-    { p_object / p_object } -> IsSameType<Type>;
-};
+    template <typename Type>
+    concept IsArithmatical = requires(Type p_object) {
+        IsComparable<Type>;
+
+        { p_object + p_object } -> IsSameType<Type>;
+        { p_object - p_object } -> IsSameType<Type>;
+        { p_object *p_object } -> IsSameType<Type>;
+        { p_object / p_object } -> IsSameType<Type>;
+    };
+
+} // namespace Ragine
 
 #endif // ARITHMATICAL_HPP
