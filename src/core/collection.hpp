@@ -13,7 +13,6 @@ concept IsCollection = requires(Type p_collection) {
     IsIterable<Type>;
 
     { p_collection.get_count() } -> IsSameType<typename Type::SizeType>;
-    { p_collection[declval<typename Type::KeyType>()] } -> IsSameType<typename Type::ValueType>;
     { p_collection.slice(declval<typename Type::KeyType>(), declval<typename Type::KeyType>()) } -> IsSameType<Type>;
 };
 
