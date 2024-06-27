@@ -214,9 +214,9 @@ concept IsFloatTypeAvailable = requires {
 };
 
 template <typename Type>
-concept IsSintTypeAvailable = requires {
-    typename Type::SintType;
-    IsInteger<typename Type::SintType>;
+concept IsIntTypeAvailable = requires {
+    typename Type::IntType;
+    IsInteger<typename Type::IntType>;
 };
 
 template <typename Type>
