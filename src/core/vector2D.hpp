@@ -10,10 +10,10 @@ concept IsVector2D = requires(Type p_vector) {
     IsSintTypeAvailable<Type>;
     IsFloatTypeAvailable<Type>;
 
-    { p_vector.x } -> IsSameType<typename Type::FloatType &>;
-    { p_vector.y } -> IsSameType<typename Type::FloatType &>;
-    { p_vector.w } -> IsSameType<typename Type::FloatType &>;
-    { p_vector.h } -> IsSameType<typename Type::FloatType &>;
+    IsSameType<AsPure<decltype(p_vector.x)>, typename Type::FloatType>;
+    IsSameType<AsPure<decltype(p_vector.y)>, typename Type::FloatType>;
+    IsSameType<AsPure<decltype(p_vector.w)>, typename Type::FloatType>;
+    IsSameType<AsPure<decltype(p_vector.h)>, typename Type::FloatType>;
 
     { p_vector *declval<typename Type::SintType>() } -> IsSameType<Type>;
     { p_vector *declval<typename Type::FloatType>() } -> IsSameType<Type>;
