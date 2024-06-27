@@ -15,6 +15,9 @@ namespace Ragine
         IsComparable<Type>;
         IsIterable<Type>;
 
+        IsComparable<typename Type::ValueType>;
+        IsComparable<typename Type::KeyType>;
+
         { p_collection.get_count() } -> IsSameType<typename Type::SizeType>;
         { p_collection.slice(declval<typename Type::KeyType>(), declval<typename Type::KeyType>()) } -> IsSameType<Type>;
     };
