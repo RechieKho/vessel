@@ -117,26 +117,10 @@ namespace Ragine::SpanTest
 
         typename SpanType::CloneType cloned = span.clone();
 
-        cloned[0] = 5; // Cloned should be writable.
+        cloned[0] = 5; // Cloned should be owned, thus writable.
 
         REQUIRE(cloned[0] == 5);
-        REQUIRE(cloned[0] != span[0]); // Cloned shouldn't be the same memory as span.
-    }
-
-    template <IsSpan SpanType>
-        requires IsUnsignedInteger<typename SpanType::ValueType>
-    auto test_uint_span_clone() -> void
-    {
-        const Uint data[] = {1, 2, 3, 4, 5};
-        const auto count = sizeof(data) / sizeof(data[0]);
-        SpanType span(data, count);
-
-        typename SpanType::CloneType cloned = span.clone();
-
-        cloned[0] = 5; // Cloned should be writable.
-
-        REQUIRE(cloned[0] == 5);
-        REQUIRE(cloned[0] != span[0]); // Cloned shouldn't be the same memory as span.
+        REQUIRE(cloned[0] != span[0]); // Cloned shouldn't have the same memory as span.
     }
 
 } // namespace Ragine::SpanTest
