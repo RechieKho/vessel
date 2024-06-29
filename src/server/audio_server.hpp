@@ -3,13 +3,12 @@
 
 #include "server.hpp"
 
-namespace Ragine
-{
+namespace Ragine {
 
-    template <typename Type>
-    concept IsAudioServer = requires(Type &p_server) {
-        IsServer<Type>;
-    };
+template <typename Type>
+concept IsAudioServer = requires(Type &p_server) {
+  IsServer<Type>;
+};
 
 } // namespace Ragine
 

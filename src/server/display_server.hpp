@@ -4,18 +4,17 @@
 #include "server.hpp"
 #include "vector2D.hpp"
 
-namespace Ragine
-{
+namespace Ragine {
 
-    template <typename Type>
-    concept IsDisplayServer = requires(Type &p_server) {
-        IsServer<Type>;
+template <typename Type>
+concept IsDisplayServer = requires(Type &p_server) {
+  IsServer<Type>;
 
-        typename Type::Vector2DType;
-        IsVector2D<typename Type::Vector2DType>;
+  typename Type::Vector2DType;
+  IsVector2D<typename Type::Vector2DType>;
 
-        { p_server.get_size() } -> IsSameType<typename Type::Vector2DType>;
-    };
+  { p_server.get_size() } -> IsSameType<typename Type::Vector2DType>;
+};
 
 } // namespace Ragine
 

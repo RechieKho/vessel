@@ -3,14 +3,13 @@
 
 #include "list.hpp"
 
-namespace Ragine
-{
+namespace Ragine {
 
-    template <typename Type, typename CharType = Char>
-    concept IsText = requires {
-        IsList<Type>;
-        IsSameType<typename Type::ValueType, CharType>;
-    };
+template <typename Type, typename CharType = Char>
+concept IsText = requires {
+  IsList<Type>;
+  IsSameType<typename Type::ValueType, CharType>;
+};
 
 } // namespace Ragine
 
