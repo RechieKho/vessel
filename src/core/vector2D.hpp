@@ -2,14 +2,13 @@
 #define VECTOR2D_HPP
 
 #include "def.hpp"
-#include "arithmatical.hpp"
 
 namespace Ragine
 {
 
     template <typename Type>
     concept IsVector2D = requires(Type p_vector) {
-        IsArithmatical<Type>;
+        IsArithmaticAvailable<Type>;
         IsSintTypeAvailable<Type>;
         IsFloatTypeAvailable<Type>;
 

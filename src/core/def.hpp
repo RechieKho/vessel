@@ -294,6 +294,16 @@ namespace Ragine
         { p_function(declval<ArgumentTypes>()...) } -> IsSameType<ReturnType>;
     };
 
+    template <typename Type>
+    concept IsArithmaticAvailable = requires(Type p_object) {
+        IsComparable<Type>;
+
+        { p_object + p_object } -> IsSameType<Type>;
+        { p_object - p_object } -> IsSameType<Type>;
+        { p_object *p_object } -> IsSameType<Type>;
+        { p_object / p_object } -> IsSameType<Type>;
+    };
+
 } // namespace Ragine
 
 #endif // DEF_HPP
