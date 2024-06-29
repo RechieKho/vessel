@@ -6,11 +6,12 @@
 #include "list.hpp"
 
 namespace Ragine::ListTest {
+
 template <IsList ListType>
 requires IsUnsignedInteger<typename ListType::ValueType>
 auto test_uint_list() -> void {
   test_uint_list_count<ListType>();
-  test_uint_list_get<ListType>();
+  test_uint_list_index<ListType>();
   test_uint_list_iteration<ListType>();
   test_uint_list_compare<ListType>();
   test_uint_list_slice<ListType>();
@@ -116,14 +117,16 @@ auto test_uint_list_remove() -> void {
 
 template <IsList ListType>
 requires IsUnsignedInteger<typename ListType::ValueType>
-auto test_uint_list_get() -> void {
+auto test_uint_list_index() -> void {
   auto list = ListType();
   list.push_back(1);
   list.push_back(2);
   list.push_back(3);
   list.push_back(4);
 
-  REQUIRE(list[0] == 1);
+  REQUIRE_NOTHROW(list[0] = 5);
+
+  REQUIRE(list[0] == 5);
   REQUIRE(list[1] == 2);
   REQUIRE(list[2] == 3);
   REQUIRE(list[3] == 4);

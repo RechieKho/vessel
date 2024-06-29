@@ -10,7 +10,7 @@ template <IsSpan SpanType>
 requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span() -> void {
   test_uint_span_count<SpanType>();
-  test_uint_span_get<SpanType>();
+  test_uint_span_index<SpanType>();
   test_uint_span_iteration<SpanType>();
   test_uint_span_compare<SpanType>();
   test_uint_span_slice<SpanType>();
@@ -30,7 +30,7 @@ auto test_uint_span_count() -> void {
 
 template <IsSpan SpanType>
 requires IsUnsignedInteger<typename SpanType::ValueType>
-auto test_uint_span_get() -> void {
+auto test_uint_span_index() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
 
