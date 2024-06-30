@@ -15,6 +15,7 @@ auto test_uint_span() -> void {
   test_uint_span_compare<SpanType>();
   test_uint_span_slice<SpanType>();
   test_uint_span_clone<SpanType>();
+  test_uint_span_contain<SpanType>();
 }
 
 template <IsSpan SpanType>
@@ -114,6 +115,21 @@ auto test_uint_span_clone() -> void {
   REQUIRE(cloned[0] == 5);
   REQUIRE(cloned[0] !=
           span[0]); // Cloned shouldn't have the same memory as span.
+}
+
+template <IsSpan SpanType>
+requires IsUnsignedInteger<typename SpanType::ValueType>
+auto test_uint_span_contain() -> void {
+  const auto data = Uint[]{1, 2, 3, 4, 5};
+  const auto count = sizeof(data) / sizeof(data[0]);
+  auto span = SpanType(data, count);
+
+  REQUIRE(span.contain(1));
+  REQUIRE(span.contain(2));
+  REQUIRE(span.contain(3));
+  REQUIRE(span.contain(4));
+  REQUIRE(span.contain(5));
+  REQUIRE_FALSE(span.contain(6));
 }
 
 } // namespace Ragine::SpanTest

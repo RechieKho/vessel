@@ -7,9 +7,16 @@ namespace Ragine {
 
 /// A view of contiguous memory.
 template <typename Type>
-concept IsSpan = requires {
+concept IsSpan = requires(Type p_span) {
   IsView<Type>;
+  IsComparable<Type>;
+  IsComparable<typename Type::ValueType>;
+  IsSameType<typename Type::KeyType, SizeType>;
 
+  {
+    p_span.slice(declval<typename Type::KeyType>(),
+                 declval<typename Type::KeyType>())
+    } -> IsSameType<Type>;
   {
     Type(declval<typename Type::ValueType *>(),
          declval<typename Type::SizeType>())

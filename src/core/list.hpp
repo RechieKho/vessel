@@ -9,7 +9,14 @@ namespace Ragine {
 template <typename Type>
 concept IsList = requires(Type p_list) {
   IsContainer<Type>;
+  IsComparable<Type>;
+  IsComparable<typename Type::ValueType>;
+  IsSameType<typename Type::KeyType, SizeType>;
 
+  {
+    p_list.slice(declval<typename Type::KeyType>(),
+                 declval<typename Type::KeyType>())
+    } -> IsSameType<Type>;
   { p_list << declval<typename Type::ValueType>() } -> IsSameType<void>;
   { p_list.push_back(declval<typename Type::ValueType>()) } -> IsSameType<void>;
   {

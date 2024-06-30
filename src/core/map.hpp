@@ -10,7 +10,9 @@ namespace Ragine {
 template <typename Type>
 concept IsMap = requires(Type p_map) {
   IsContainer<Type>;
+  IsEqualityAvailable<Type>;
   IsComparable<typename Type::KeyType>;
+  IsEqualityAvailable<typename Type::ValueType>;
 
   typename Type::KeyListType;
   IsList<typename Type::KeyListType>;
@@ -22,6 +24,7 @@ concept IsMap = requires(Type p_map) {
 
   { p_map.compute_keys() } -> IsSameType<typename Type::KeyListType>;
   { p_map.compute_values() } -> IsSameType<typename Type::ValueListType>;
+  { p_map.contain_key(declval<typename Type::KeyType>()) } -> IsSameType<Bool>;
 };
 
 } // namespace Ragine

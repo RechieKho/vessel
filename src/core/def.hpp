@@ -262,9 +262,19 @@ concept IsIterable = requires(Type p_iterable) {
 };
 
 template <typename Type>
-concept IsComparable = requires(Type p_object) {
+concept IsEqualityAvailable = requires(Type p_object) {
   { p_object == p_object } -> IsSameType<Bool>;
+};
+
+template <typename Type>
+concept IsOrderingAvailable = requires(Type p_object) {
   { p_object < p_object } -> IsSameType<Bool>;
+};
+
+template <typename Type>
+concept IsComparable = requires(Type p_object) {
+  IsEqualityAvailable<Type>;
+  IsOrderingAvailable<Type>;
 };
 
 template <typename Type, typename ReturnType, typename... ArgumentTypes>

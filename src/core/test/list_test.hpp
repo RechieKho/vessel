@@ -11,11 +11,17 @@ template <IsList ListType>
 requires IsUnsignedInteger<typename ListType::ValueType>
 auto test_uint_list() -> void {
   test_uint_list_count<ListType>();
+  test_uint_list_insert<ListType>();
+  test_uint_list_push_front<ListType>();
+  test_uint_list_remove<ListType>();
+  test_uint_list_pop_back<ListType>();
+  test_uint_list_pop_front<ListType>();
   test_uint_list_index<ListType>();
   test_uint_list_iteration<ListType>();
   test_uint_list_compare<ListType>();
   test_uint_list_slice<ListType>();
   test_uint_list_clone<ListType>();
+  test_uint_list_contain<ListType>();
 }
 
 template <IsList ListType>
@@ -216,6 +222,21 @@ auto test_uint_list_clone() -> void {
           list[0]); // Cloned shouldn't have the same memory as list.
 }
 
+template <IsList ListType>
+requires IsUnsignedInteger<typename ListType::ValueType>
+auto test_uint_list_contain() -> void {
+  auto list = ListType();
+  list.push_back(1);
+  list.push_back(2);
+  list.push_back(3);
+  list.push_back(4);
+
+  REQUIRE(list.contain(1));
+  REQUIRE(list.contain(2));
+  REQUIRE(list.contain(3));
+  REQUIRE(list.contain(4));
+  REQUIRE_FALSE(list.contain(5));
+}
 } // namespace Ragine::ListTest
 
 #endif // LIST_TEST_HPP
