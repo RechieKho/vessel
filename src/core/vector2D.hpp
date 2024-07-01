@@ -8,13 +8,15 @@ namespace Ragine {
 template <typename Type>
 concept IsVector2D = requires(Type p_vector) {
   IsArithmaticAvailable<Type>;
+  IsValueTypeAvailable<Type>;
+  IsNumeric<typename Type::ValueType>;
   IsSintTypeAvailable<Type>;
   IsFloatTypeAvailable<Type>;
 
-  IsSameType<AsPure<decltype(p_vector.x)>, typename Type::FloatType>;
-  IsSameType<AsPure<decltype(p_vector.y)>, typename Type::FloatType>;
-  IsSameType<AsPure<decltype(p_vector.w)>, typename Type::FloatType>;
-  IsSameType<AsPure<decltype(p_vector.h)>, typename Type::FloatType>;
+  IsSameType<decltype(p_vector.x), typename Type::ValueType &>;
+  IsSameType<decltype(p_vector.y), typename Type::ValueType &>;
+  IsSameType<decltype(p_vector.w), typename Type::ValueType &>;
+  IsSameType<decltype(p_vector.h), typename Type::ValueType &>;
 
   { p_vector *declval<typename Type::SintType>() } -> IsSameType<Type>;
   { p_vector *declval<typename Type::FloatType>() } -> IsSameType<Type>;
@@ -24,6 +26,17 @@ concept IsVector2D = requires(Type p_vector) {
   { p_vector.dot(p_vector) } -> IsSameType<typename Type::FloatType>;
   { p_vector.compute_length() } -> IsSameType<typename Type::FloatType>;
   { p_vector.compute_length_squared() } -> IsSameType<typename Type::FloatType>;
+  { p_vector.normalized() } -> IsSameType<Type>;
+  { p_vector.rotated(declval<typename Type::FloatType>()) } -> IsSameType<Type>;
+  { p_vector.reflected(p_vector) } -> IsSameType<Type>;
+  {
+    Type::lerp(p_vector, p_vector, declval<typename Type::FloatType>())
+    } -> IsSameType<Type>;
+  { Type::clamp(p_vector, p_vector, p_vector) } -> IsSameType<Type>;
+  {
+    Type::clamp_length(p_vector, declval<typename Type::ValueType>(),
+                       declval<typename Type::ValueType>())
+    } -> IsSameType<Type>;
 };
 
 } // namespace Ragine
