@@ -23,12 +23,14 @@ concept IsVector2D = requires(Type p_vector) {
   { p_vector / declval<typename Type::SintType>() } -> IsSameType<Type>;
   { p_vector / declval<typename Type::FloatType>() } -> IsSameType<Type>;
 
-  { p_vector.dot(p_vector) } -> IsSameType<typename Type::FloatType>;
+  { p_vector.compute_dot(p_vector) } -> IsSameType<typename Type::FloatType>;
   { p_vector.compute_length() } -> IsSameType<typename Type::FloatType>;
   { p_vector.compute_length_squared() } -> IsSameType<typename Type::FloatType>;
-  { p_vector.normalized() } -> IsSameType<Type>;
-  { p_vector.rotated(declval<typename Type::FloatType>()) } -> IsSameType<Type>;
-  { p_vector.reflected(p_vector) } -> IsSameType<Type>;
+  { p_vector.compute_normalized() } -> IsSameType<Type>;
+  {
+    p_vector.compute_rotated(declval<typename Type::FloatType>())
+    } -> IsSameType<Type>;
+  { p_vector.compute_reflected(p_vector) } -> IsSameType<Type>;
   {
     Type::lerp(p_vector, p_vector, declval<typename Type::FloatType>())
     } -> IsSameType<Type>;
