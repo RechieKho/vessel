@@ -215,7 +215,7 @@ concept IsSizeTypeAvailable = requires {
   IsUnsignedInteger<typename Type::SizeType>;
 };
 
-template <typename Type> Type &&declval() {
+template <typename Type> auto declval() -> Type && {
   throw Exception("`declval` must not be used in evaluated context.");
 }
 
