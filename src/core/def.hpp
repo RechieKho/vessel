@@ -60,73 +60,74 @@ concept IsValueAvailable = requires {
   Type::value;
 };
 
-struct Inconstructible {
-  ~Inconstructible() = delete;
-};
+template <class = void> struct Inconstructible { ~Inconstructible() = delete; };
 
 template <class = void> struct Dummy {};
 
 constexpr const Dummy<> dummy_value;
 
-template <typename TargetType> struct RemovePointer : public Inconstructible {
+template <typename TargetType> struct RemovePointer : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemovePointer<TargetType *> : public Inconstructible {
+struct RemovePointer<TargetType *> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemovePointer<TargetType *const> : public Inconstructible {
+struct RemovePointer<TargetType *const> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemovePointer<TargetType *volatile> : public Inconstructible {
+struct RemovePointer<TargetType *volatile> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemovePointer<TargetType *const volatile> : public Inconstructible {
+struct RemovePointer<TargetType *const volatile> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 static_assert(IsTypeAvailable<RemovePointer<Dummy<>>>);
 
-template <typename TargetType> struct RemoveConstant : public Inconstructible {
+template <typename TargetType>
+struct RemoveConstant : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemoveConstant<const TargetType> : public Inconstructible {
+struct RemoveConstant<const TargetType> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 static_assert(IsTypeAvailable<RemoveConstant<Dummy<>>>);
 
-template <typename TargetType> struct RemoveVolatile : public Inconstructible {
+template <typename TargetType>
+struct RemoveVolatile : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemoveVolatile<volatile TargetType> : public Inconstructible {
+struct RemoveVolatile<volatile TargetType> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 static_assert(IsTypeAvailable<RemoveVolatile<Dummy<>>>);
 
-template <typename TargetType> struct RemoveReference : public Inconstructible {
+template <typename TargetType>
+struct RemoveReference : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemoveReference<TargetType &> : public Inconstructible {
+struct RemoveReference<TargetType &> : public Inconstructible<> {
   using Type = TargetType;
 };
 
 template <typename TargetType>
-struct RemoveReference<TargetType &&> : public Inconstructible {
+struct RemoveReference<TargetType &&> : public Inconstructible<> {
   using Type = TargetType;
 };
 
@@ -137,7 +138,7 @@ using AsPure = RemoveConstant<typename RemoveVolatile<
     typename RemoveReference<TargetType>::Type>::Type>::Type;
 
 template <typename Type, Type Value>
-struct CompileTimeItem : public Inconstructible {
+struct CompileTimeItem : public Inconstructible<> {
   using ValueType = Type;
   static constexpr const ValueType value = Value;
 };
