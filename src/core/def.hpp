@@ -220,7 +220,17 @@ template <typename Type> auto declval() -> Type && {
 }
 
 template <typename Type> auto move(Type &&p_object) {
-  return static_cast<typename RemoveReference<Type>::Type>(p_object);
+  return static_cast<typename RemoveReference<Type>::Type &&>(p_object);
+}
+
+template <typename Type>
+auto forward(typename RemoveReference<Type>::Type &&p_object) {
+  return static_cast<Type &&>(p_object);
+}
+
+template <typename Type>
+auto forward(typename RemoveReference<Type>::Type &p_object) {
+  return static_cast<Type &&>(p_object);
 }
 
 template <typename Type>
