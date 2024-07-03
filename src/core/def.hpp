@@ -293,6 +293,21 @@ concept IsArithmaticAvailable = requires(Type p_object) {
   { p_object / p_object } -> IsSameType<Type>;
 };
 
+template <typename DerivedType, typename BaseType>
+concept IsBaseType = IsConvertible<DerivedType *, BaseType *>;
+
+template <typename Type>
+concept IsInconstructible = IsBaseType<Type, Inconstructible<>>;
+
+template <class = void> struct Configuration : public Inconstructible<> {
+  using SintType = ::Sint;
+  using UintType = ::Uint;
+  using FloatType = ::Float;
+};
+
+template <typename Type>
+concept IsConfiguration = IsBaseType<Type, Configuration<>>;
+
 } // namespace Ragine
 
 #endif // DEF_HPP
