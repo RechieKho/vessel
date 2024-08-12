@@ -1,12 +1,15 @@
 #include <catch2/catch_test_macros.hpp>
+#include <exception>
 
-unsigned int Factorial(unsigned int number) {
-  return number <= 1 ? number : Factorial(number - 1) * number;
-}
+#include "impl/array_list.hpp"
+#include "list_test.hpp"
 
-TEST_CASE("Factorials are computed", "[factorial]") {
-  REQUIRE(Factorial(1) == 1);
-  REQUIRE(Factorial(2) == 2);
-  REQUIRE(Factorial(3) == 6);
-  REQUIRE(Factorial(10) == 3628800);
+using namespace Ragine;
+
+TEST_CASE("`ArrayList` implementation", "[ArrayList]") {
+  try{
+    ListTest::test_uint_list<ArrayList<Uint>>();
+  } catch(UnimplementedException<> p_exception) {
+    throw std::runtime_error(p_exception.what());
+  }
 }

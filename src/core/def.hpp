@@ -37,30 +37,37 @@ private:
 
 public:
   Exception(ValueType p_message) : message(p_message) {}
-  ValueType what() { return message; }
+  virtual auto what() const noexcept -> ValueType { return message; }
 };
+
+template <class = void> class UnimplementedException : public Exception<> {
+public:
+  using ExceptionBaseType = Exception<>;
+
+private:
+public:
+  UnimplementedException() : ExceptionBaseType("Unimplemented.") {}
+};
+
+template <typename Type> auto declval() -> Type && {
+  throw Exception("`declval` must not be used in evaluated context.");
+}
 
 template <typename Type>
-concept IsTypeAvailable = requires {
-  typename Type::Type;
-};
+concept IsTypeAvailable = requires { typename Type::Type; };
 
 template <typename Type>
-concept IsKeyTypeAvailable = requires {
-  typename Type::KeyType;
-};
+concept IsKeyTypeAvailable = requires { typename Type::KeyType; };
 
 template <typename Type>
-concept IsValueTypeAvailable = requires {
-  typename Type::ValueType;
-};
+concept IsValueTypeAvailable = requires { typename Type::ValueType; };
 
 template <typename Type>
-concept IsValueAvailable = requires {
-  Type::value;
-};
+concept IsValueAvailable = requires { Type::value; };
 
-template <class = void> struct Inconstructible { ~Inconstructible() = delete; };
+template <class = void> struct Inconstructible {
+  ~Inconstructible() = delete;
+};
 
 template <class = void> struct Dummy {};
 
@@ -159,28 +166,24 @@ template <typename FirstType, typename SecondType>
 concept IsSameType = SameType<FirstType, SecondType>::value;
 
 template <typename FromType, typename ToType>
-concept IsConvertible = requires(FromType p_object) {
-  ToType(p_object);
-};
+concept IsConvertible = requires { ToType(declval<FromType>()); };
 
 template <typename Type>
-concept IsSignedInteger = (IsSameType<AsPure<Type>, Sint8> ||
-                           IsSameType<AsPure<Type>, Sint16> ||
-                           IsSameType<AsPure<Type>, Sint32> ||
-                           IsSameType<AsPure<Type>, Sint64>);
+concept IsSignedInteger =
+    (IsSameType<AsPure<Type>, Sint8> || IsSameType<AsPure<Type>, Sint16> ||
+     IsSameType<AsPure<Type>, Sint32> || IsSameType<AsPure<Type>, Sint64>);
 
 template <typename Type>
-concept IsUnsignedInteger = (IsSameType<AsPure<Type>, Uint8> ||
-                             IsSameType<AsPure<Type>, Uint16> ||
-                             IsSameType<AsPure<Type>, Uint32> ||
-                             IsSameType<AsPure<Type>, Uint64>);
+concept IsUnsignedInteger =
+    (IsSameType<AsPure<Type>, Uint8> || IsSameType<AsPure<Type>, Uint16> ||
+     IsSameType<AsPure<Type>, Uint32> || IsSameType<AsPure<Type>, Uint64>);
 
 template <typename Type>
 concept IsInteger = IsSignedInteger<Type> || IsUnsignedInteger<Type>;
 
 template <typename Type>
-concept IsFloat = (IsSameType<AsPure<Type>, Float32> ||
-                   IsSameType<AsPure<Type>, Float64>);
+concept IsFloat =
+    (IsSameType<AsPure<Type>, Float32> || IsSameType<AsPure<Type>, Float64>);
 
 template <typename Type>
 concept IsNumeric = IsFloat<Type> || IsInteger<Type>;
@@ -215,10 +218,6 @@ concept IsSizeTypeAvailable = requires {
   IsUnsignedInteger<typename Type::SizeType>;
 };
 
-template <typename Type> auto declval() -> Type && {
-  throw Exception("`declval` must not be used in evaluated context.");
-}
-
 template <typename Type> auto move(Type &&p_object) {
   return static_cast<typename RemoveReference<Type>::Type &&>(p_object);
 }
@@ -234,73 +233,63 @@ auto forward(typename RemoveReference<Type>::Type &p_object) {
 }
 
 template <typename Type>
-concept IsForwardIterator = requires(Type p_iterator) {
-  IsValueTypeAvailable<Type>;
-
-  { ++p_iterator } -> IsSameType<Type>;
-  { *p_iterator } -> IsSameType<typename Type::ValueType>;
-  { p_iterator == p_iterator } -> IsSameType<Bool>;
+concept IsForwardIterator = IsValueTypeAvailable<Type> && requires {
+  { ++declval<Type>() } -> IsSameType<Type &>;
+  { *declval<Type>() } -> IsSameType<typename Type::ValueType>;
+  { declval<Type>() == declval<const Type &>() } -> IsSameType<Bool>;
 };
 
 template <typename Type>
-concept IsBidirectionalIterator = requires(Type p_iterator) {
-  IsForwardIterator<Type>;
-
-  { --p_iterator } -> IsSameType<Type>;
+concept IsBidirectionalIterator = IsForwardIterator<Type> && requires {
+  { --declval<Type>() } -> IsSameType<Type &>;
 };
 
 template <typename Type>
-concept IsRandomAccessIterator = requires(Type p_iterator) {
-  IsBidirectionalIterator<Type>;
-  IsKeyTypeAvailable<Type>;
+concept IsRandomAccessIterator =
+    IsBidirectionalIterator<Type> && IsKeyTypeAvailable<Type> && requires {
+      {
+        declval<Type>()[declval<typename Type::KeyType>()]
+      } -> IsSameType<typename Type::ValueType>;
+    };
 
-  {
-    p_iterator[declval<typename Type::KeyType>()]
-    } -> IsSameType<typename Type::ValueType>;
+template <typename Type>
+concept IsContiguousIterator = IsRandomAccessIterator<Type> && requires {
+  { declval<Type>() - declval<Type>() } -> IsSameType<SizeType>;
 };
 
 template <typename Type>
-concept IsContiguousIterator = requires(Type p_iterator) {
-  IsRandomAccessIterator<Type>;
-
-  { p_iterator - p_iterator } -> IsSameType<SizeType>;
+concept IsIterable = requires {
+  { declval<Type>().begin() } -> IsForwardIterator;
+  { declval<Type>().end() } -> IsForwardIterator;
 };
 
 template <typename Type>
-concept IsIterable = requires(Type p_iterable) {
-  { p_iterable.begin() } -> IsForwardIterator;
-  { p_iterable.end() } -> IsForwardIterator;
+concept IsEqualityAvailable = requires {
+  { declval<Type>() == declval<Type>() } -> IsSameType<Bool>;
 };
 
 template <typename Type>
-concept IsEqualityAvailable = requires(Type p_object) {
-  { p_object == p_object } -> IsSameType<Bool>;
+concept IsOrderingAvailable = requires {
+  { declval<Type>() < declval<Type>() } -> IsSameType<Bool>;
 };
 
 template <typename Type>
-concept IsOrderingAvailable = requires(Type p_object) {
-  { p_object < p_object } -> IsSameType<Bool>;
-};
-
-template <typename Type>
-concept IsComparable = requires(Type p_object) {
+concept IsComparable = requires {
   IsEqualityAvailable<Type>;
   IsOrderingAvailable<Type>;
 };
 
 template <typename Type, typename ReturnType, typename... ArgumentTypes>
-concept IsFunction = requires(Type p_function) {
-  { p_function(declval<ArgumentTypes>()...) } -> IsSameType<ReturnType>;
+concept IsCallable = requires {
+  { declval<Type>()(declval<ArgumentTypes>()...) } -> IsSameType<ReturnType>;
 };
 
 template <typename Type>
-concept IsArithmaticAvailable = requires(Type p_object) {
-  IsComparable<Type>;
-
-  { p_object + p_object } -> IsSameType<Type>;
-  { p_object - p_object } -> IsSameType<Type>;
-  { p_object *p_object } -> IsSameType<Type>;
-  { p_object / p_object } -> IsSameType<Type>;
+concept IsArithmaticAvailable = IsComparable<Type> && requires {
+  { declval<Type>() + declval<Type>() } -> IsSameType<Type>;
+  { declval<Type>() - declval<Type>() } -> IsSameType<Type>;
+  { declval<Type>() * declval<Type>() } -> IsSameType<Type>;
+  { declval<Type>() / declval<Type>() } -> IsSameType<Type>;
 };
 
 template <typename DerivedType, typename BaseType>
@@ -310,9 +299,10 @@ template <typename Type>
 concept IsInconstructible = IsBaseType<Type, Inconstructible<>>;
 
 template <class = void> struct Configuration : public Inconstructible<> {
-  using SintType = ::Sint;
-  using UintType = ::Uint;
-  using FloatType = ::Float;
+  using SizeType = Ragine::SizeType;
+  using SintType = Ragine::Sint;
+  using UintType = Ragine::Uint;
+  using FloatType = Ragine::Float;
 };
 
 template <typename Type>

@@ -6,14 +6,14 @@
 namespace Ragine {
 
 template <typename Type>
-concept IsWindowController = requires(Type p_controller) {
-  { p_controller.set_fullscreen(declval<Bool>()) } -> IsSameType<void>;
-};
+concept IsWindowController = 
+  requires {
+    { declval<Type>().set_fullscreen(declval<Bool>()) } -> IsSameType<void>;
+  };
 
 template <typename Type>
-concept IsMainController = requires(Type p_controller) {
-  IsWindowController<decltype(p_controller.window)>;
-};
+concept IsMainController = 
+  IsWindowController<decltype(declval<Type>().window)>;
 
 } // namespace Ragine
 

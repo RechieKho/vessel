@@ -8,18 +8,6 @@
 namespace Ragine::SpanTest {
 template <IsSpan SpanType>
 requires IsUnsignedInteger<typename SpanType::ValueType>
-auto test_uint_span() -> void {
-  test_uint_span_count<SpanType>();
-  test_uint_span_index<SpanType>();
-  test_uint_span_iteration<SpanType>();
-  test_uint_span_compare<SpanType>();
-  test_uint_span_slice<SpanType>();
-  test_uint_span_clone<SpanType>();
-  test_uint_span_contain<SpanType>();
-}
-
-template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_count() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -130,6 +118,18 @@ auto test_uint_span_contain() -> void {
   REQUIRE(span.contain(4));
   REQUIRE(span.contain(5));
   REQUIRE_FALSE(span.contain(6));
+}
+
+template <IsSpan SpanType>
+requires IsUnsignedInteger<typename SpanType::ValueType>
+auto test_uint_span() -> void {
+  test_uint_span_count<SpanType>();
+  test_uint_span_index<SpanType>();
+  test_uint_span_iteration<SpanType>();
+  test_uint_span_compare<SpanType>();
+  test_uint_span_slice<SpanType>();
+  test_uint_span_clone<SpanType>();
+  test_uint_span_contain<SpanType>();
 }
 
 } // namespace Ragine::SpanTest

@@ -8,26 +8,24 @@
 namespace Ragine {
 
 template <typename Type>
-concept IsNode = requires(Type p_node) {
-  IsKeyTypeAvailable<Type>;
-
-  typename Type::MainControllerType;
-  IsMainController<typename Type::MainControllerType>;
-
-  typename Type::NodeListType;
-  IsList<typename Type::NodeListType>;
-  IsSameType<typename Type::NodeListType::ValueType, Type>;
-
-  Type(declval<typename Type::MainControllerType>());
-
-  { p_node.get_children() } -> IsSameType<typename Type::NodeListType>;
-  { p_node.get_child(declval<SizeType>()) } -> IsSameType<Type>;
-  { p_node.get_node(declval<typename Type::KeyType>()) } -> IsSameType<Type>;
-
-  { p_node.ready() } -> IsSameType<void>;
-  { p_node.process(declval<Float>()) } -> IsSameType<void>;
-  { p_node.draw2D() } -> IsSameType<void>;
-};
+concept IsNode = 
+  requires {
+    typename Type::MainControllerType;
+    typename Type::NodeListType;
+  } &&
+  IsKeyTypeAvailable<Type> &&
+  IsMainController<typename Type::MainControllerType> &&
+  IsList<typename Type::NodeListType> &&
+  IsSameType<typename Type::NodeListType::ValueType, Type> &&
+  requires {
+    Type(declval<typename Type::MainControllerType>());
+    { declval<Type>().get_children() } -> IsSameType<typename Type::NodeListType>;
+    { declval<Type>().get_child(declval<SizeType>()) } -> IsSameType<Type>;
+    { declval<Type>().get_node(declval<typename Type::KeyType>()) } -> IsSameType<Type>;
+    { declval<Type>().ready() } -> IsSameType<void>;
+    { declval<Type>().process(declval<Float>()) } -> IsSameType<void>;
+    { declval<Type>().draw2D() } -> IsSameType<void>;
+  };
 
 } // namespace Ragine
 

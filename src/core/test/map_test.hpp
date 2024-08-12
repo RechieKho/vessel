@@ -6,24 +6,6 @@
 #include "map.hpp"
 
 namespace Ragine::MapTest {
-
-template <IsMap MapType>
-requires IsUnsignedInteger<typename MapType::KeyType> &&
-    IsUnsignedInteger<typename MapType::ValueType>
-auto test_uint_to_uint_map() -> void {
-  test_uint_to_uint_map_count<MapType>();
-  test_uint_to_uint_map_insert<MapType>();
-  test_uint_to_uint_map_remove<MapType>();
-  test_uint_to_uint_map_index<MapType>();
-  test_uint_to_uint_map_iteration<MapType>();
-  test_uint_to_uint_map_equality<MapType>();
-  test_uint_to_uint_map_clone<MapType>();
-  test_uint_to_uint_map_contain<MapType>();
-  test_uint_to_uint_map_contain_key<MapType>();
-  test_uint_to_uint_map_compute_keys<MapType>();
-  test_uint_to_uint_map_compute_values<MapType>();
-}
-
 template <IsMap MapType>
 requires IsUnsignedInteger<typename MapType::KeyType> &&
     IsUnsignedInteger<typename MapType::ValueType>
@@ -220,6 +202,23 @@ auto test_uint_to_uint_map_compute_values() -> void {
   REQUIRE(values.contain(6));
   REQUIRE(values.contain(11));
   REQUIRE_FALSE(values.contain(12));
+}
+
+template <IsMap MapType>
+requires IsUnsignedInteger<typename MapType::KeyType> &&
+    IsUnsignedInteger<typename MapType::ValueType>
+auto test_uint_to_uint_map() -> void {
+  test_uint_to_uint_map_count<MapType>();
+  test_uint_to_uint_map_insert<MapType>();
+  test_uint_to_uint_map_remove<MapType>();
+  test_uint_to_uint_map_index<MapType>();
+  test_uint_to_uint_map_iteration<MapType>();
+  test_uint_to_uint_map_equality<MapType>();
+  test_uint_to_uint_map_clone<MapType>();
+  test_uint_to_uint_map_contain<MapType>();
+  test_uint_to_uint_map_contain_key<MapType>();
+  test_uint_to_uint_map_compute_keys<MapType>();
+  test_uint_to_uint_map_compute_values<MapType>();
 }
 
 } // namespace Ragine::MapTest
