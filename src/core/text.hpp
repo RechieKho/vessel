@@ -3,13 +3,11 @@
 
 #include "list.hpp"
 
-namespace Ragine {
+namespace Vessel {
 
 template <typename Type, typename CharType = Char>
-concept IsText = 
-    IsList<Type> && 
-    IsSameType<typename Type::ValueType, CharType>;
+concept IsText = IsList<Type> && IsSameType<typename Type::ValueType, CharType>;
 
-} // namespace Ragine
+} // namespace Vessel
 
 #endif // TEXT_HPP

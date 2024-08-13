@@ -5,9 +5,9 @@
 
 #include "span.hpp"
 
-namespace Ragine::SpanTest {
+namespace Vessel::SpanTest {
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_count() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -18,7 +18,7 @@ auto test_uint_span_count() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_index() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -34,7 +34,7 @@ auto test_uint_span_index() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_iteration() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -49,7 +49,7 @@ auto test_uint_span_iteration() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_compare() -> void {
   const auto data_a = Uint[]{1, 2, 3, 4, 5};
   const auto count_a = sizeof(data_a) / sizeof(data_a[0]);
@@ -74,7 +74,7 @@ auto test_uint_span_compare() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_slice() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -90,7 +90,7 @@ auto test_uint_span_slice() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_clone() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -106,7 +106,7 @@ auto test_uint_span_clone() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span_contain() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
@@ -121,7 +121,7 @@ auto test_uint_span_contain() -> void {
 }
 
 template <IsSpan SpanType>
-requires IsUnsignedInteger<typename SpanType::ValueType>
+  requires IsUnsignedInteger<typename SpanType::ValueType>
 auto test_uint_span() -> void {
   test_uint_span_count<SpanType>();
   test_uint_span_index<SpanType>();
@@ -132,6 +132,6 @@ auto test_uint_span() -> void {
   test_uint_span_contain<SpanType>();
 }
 
-} // namespace Ragine::SpanTest
+} // namespace Vessel::SpanTest
 
 #endif // SPAN_TEST_HPP

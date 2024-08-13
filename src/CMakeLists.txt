@@ -1,12 +1,12 @@
 set(CORE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/core)
-set(SCENE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/scene)
 
 enable_testing()
 add_subdirectory(${CORE_DIR})
-add_subdirectory(${SCENE_DIR})
 
-add_executable(${PROJECT_NAME} ${CMAKE_CURRENT_SOURCE_DIR}/main.cpp)
-target_link_libraries(${PROJECT_NAME} 
-    PRIVATE 
-        ${PROJECT_NAME}_core ${PROJECT_NAME}_scene
+set(LIBRARY_NAME ${PROJECT_NAME})
+add_library(${LIBRARY_NAME} INTERFACE)
+target_link_libraries(
+    ${LIBRARY_NAME}
+    INTERFACE
+        ${LIBRARY_NAME}_core
 )

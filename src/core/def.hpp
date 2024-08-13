@@ -3,7 +3,7 @@
 
 #include <stdint.h>
 
-namespace Ragine {
+namespace Vessel {
 
 using Sint8 = int8_t;
 using Sint16 = int16_t;
@@ -299,15 +299,15 @@ template <typename Type>
 concept IsInconstructible = IsBaseType<Type, Inconstructible<>>;
 
 template <class = void> struct Configuration : public Inconstructible<> {
-  using SizeType = Ragine::SizeType;
-  using SintType = Ragine::Sint;
-  using UintType = Ragine::Uint;
-  using FloatType = Ragine::Float;
+  using SizeType = Vessel::SizeType;
+  using SintType = Vessel::Sint;
+  using UintType = Vessel::Uint;
+  using FloatType = Vessel::Float;
 };
 
 template <typename Type>
 concept IsConfiguration = IsBaseType<Type, Configuration<>>;
 
-} // namespace Ragine
+} // namespace Vessel
 
 #endif // DEF_HPP

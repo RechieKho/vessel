@@ -4,12 +4,12 @@
 #include "impl/array_list.hpp"
 #include "list_test.hpp"
 
-using namespace Ragine;
+using namespace Vessel;
 
 TEST_CASE("`ArrayList` implementation", "[ArrayList]") {
-  try{
+  try {
     ListTest::test_uint_list<ArrayList<Uint>>();
-  } catch(UnimplementedException<> p_exception) {
+  } catch (UnimplementedException<> p_exception) {
     throw std::runtime_error(p_exception.what());
   }
 }

@@ -4,14 +4,12 @@
 #include "def.hpp"
 #include "list.hpp"
 
-namespace Ragine {
+namespace Vessel {
 
 template <typename Type>
-concept IsArrayListConfiguration = 
-  requires {
-    { Type::initial_capacity } -> IsSameType<const typename Type::SizeType &>;
-  } &&
-  IsConfiguration<Type>;
+concept IsArrayListConfiguration = requires {
+  { Type::initial_capacity } -> IsSameType<const typename Type::SizeType &>;
+} && IsConfiguration<Type>;
 
 template <class = void>
 struct DefaultArrayListConfiguration : public Configuration<> {
@@ -19,7 +17,8 @@ struct DefaultArrayListConfiguration : public Configuration<> {
 };
 static_assert(IsArrayListConfiguration<DefaultArrayListConfiguration<>>);
 
-template <typename Type, IsArrayListConfiguration ConfigurationType = DefaultArrayListConfiguration<>>
+template <typename Type, IsArrayListConfiguration ConfigurationType =
+                             DefaultArrayListConfiguration<>>
 class ArrayList {
 public:
   using SizeType = ConfigurationType::SizeType;
@@ -125,7 +124,9 @@ public:
 
   auto get_count() const -> SizeType { throw UnimplementedException(); }
 
-  auto contain(const ValueType &p_value) const -> Bool { throw UnimplementedException(); }
+  auto contain(const ValueType &p_value) const -> Bool {
+    throw UnimplementedException();
+  }
 
   auto begin() -> Iterator { throw UnimplementedException(); };
 
@@ -137,6 +138,6 @@ public:
 };
 static_assert(IsList<ArrayList<Dummy<>>>);
 
-} // namespace Ragine
+} // namespace Vessel
 
 #endif // IMPL_ARRAY_LIST_HPP

@@ -1,6 +1,3 @@
-# Ragine
+# Vessel
 
-> Obsession of modern C++, especially `concept`, has truly infected me.
-> Now I must make a game engine with it.
-
-Another game engine written in modern C++.
+A total template container library with `concept`-asserted interface and swappable, configurable implementation.
