@@ -6,34 +6,30 @@
 
 namespace Vessel {
 
-template <typename Type>
-concept IsArrayListConfiguration = requires {
-  { Type::initial_capacity } -> IsSameType<const typename Type::SizeType &>;
-} && IsConfiguration<Type>;
+template <typename PType>
+concept IsArrayListConfiguration =
+    IsListSubTypesAvailable<PType> && IsConfiguration<PType> && requires {
+      {
+        PType::initial_capacity
+      } -> IsSameType<const typename PType::SizeType &>;
+    };
 
-template <class = void>
+template <class PType>
 struct DefaultArrayListConfiguration : public Configuration<> {
+  using ValueType = PType;
+  using KeyType = SizeType;
   static constexpr const SizeType initial_capacity = 16;
 };
-static_assert(IsArrayListConfiguration<DefaultArrayListConfiguration<>>);
+static_assert(IsArrayListConfiguration<DefaultArrayListConfiguration<Dummy>>);
 
-template <typename Type, IsArrayListConfiguration ConfigurationType =
-                             DefaultArrayListConfiguration<>>
-class ArrayList {
+template <IsArrayListConfiguration PConfigurationType>
+class ArrayListImplementation {
 public:
-  using SizeType = ConfigurationType::SizeType;
-  using KeyType = SizeType;
-  using ValueType = Type;
+  using SizeType = typename PConfigurationType::SizeType;
+  using KeyType = typename PConfigurationType::KeyType;
+  using ValueType = typename PConfigurationType::ValueType;
 
 private:
-  ValueType *values;
-  SizeType count;
-  SizeType capacity;
-
-  auto reserve(SizeType p_minimum_capacity) -> void {
-    throw UnimplementedException();
-  }
-
   class Iterator {
   public:
     using ValueType = ValueType &;
@@ -65,20 +61,26 @@ private:
   };
 
 public:
-  explicit ArrayList(
-      SizeType p_initial_capacity = ConfigurationType::initial_capacity) {
+  explicit ArrayListImplementation(
+      SizeType p_initial_capacity = PConfigurationType::initial_capacity) {
     throw UnimplementedException();
   }
 
-  ArrayList(const ArrayList &p_list) { throw UnimplementedException(); }
-
-  ArrayList(ArrayList &&p_list) { throw UnimplementedException(); }
-
-  auto operator=(const ArrayList &p_list) -> ArrayList & {
+  ArrayListImplementation(const ArrayListImplementation &p_list) {
     throw UnimplementedException();
   }
 
-  auto operator=(ArrayList &&p_list) -> ArrayList & {
+  ArrayListImplementation(ArrayListImplementation &&p_list) {
+    throw UnimplementedException();
+  }
+
+  auto operator=(const ArrayListImplementation &p_list)
+      -> ArrayListImplementation & {
+    throw UnimplementedException();
+  }
+
+  auto
+  operator=(ArrayListImplementation &&p_list) -> ArrayListImplementation & {
     throw UnimplementedException();
   }
 
@@ -90,19 +92,19 @@ public:
     throw UnimplementedException();
   }
 
-  auto operator==(const ArrayList &p_list) const -> Bool {
+  auto operator==(const ArrayListImplementation &p_list) const -> Bool {
     throw UnimplementedException();
   }
 
-  auto operator<(const ArrayList &p_list) const -> Bool {
+  auto operator<(const ArrayListImplementation &p_list) const -> Bool {
     throw UnimplementedException();
   }
 
-  auto operator<<(ValueType p_value) -> ArrayList & {
+  auto operator<<(ValueType p_value) -> ArrayListImplementation & {
     throw UnimplementedException();
   }
 
-  auto slice(KeyType p_start, KeyType p_end) const -> ArrayList {
+  auto slice(KeyType p_start, KeyType p_end) const -> ArrayListImplementation {
     throw UnimplementedException();
   }
 
@@ -120,7 +122,9 @@ public:
 
   auto pop_front() -> ValueType { throw UnimplementedException(); }
 
-  auto clone() const -> ArrayList { throw UnimplementedException(); }
+  auto clone() const -> ArrayListImplementation {
+    throw UnimplementedException();
+  }
 
   auto get_count() const -> SizeType { throw UnimplementedException(); }
 
@@ -136,7 +140,11 @@ public:
 
   auto end() const -> ConstantIterator { throw UnimplementedException(); };
 };
-static_assert(IsList<ArrayList<Dummy<>>>);
+
+template <typename PType>
+using ArrayList = ArrayListImplementation<DefaultArrayListConfiguration<PType>>;
+
+static_assert(IsList<ArrayList<Dummy>>);
 
 } // namespace Vessel
 

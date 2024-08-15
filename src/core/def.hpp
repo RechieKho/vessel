@@ -49,254 +49,301 @@ public:
   UnimplementedException() : ExceptionBaseType("Unimplemented.") {}
 };
 
-template <typename Type> auto declval() -> Type && {
+template <typename PType> auto declval() -> PType && {
   throw Exception("`declval` must not be used in evaluated context.");
 }
 
-template <typename Type>
-concept IsTypeAvailable = requires { typename Type::Type; };
+template <typename PType>
+concept IsTypeAvailable = requires { typename PType::Type; };
 
-template <typename Type>
-concept IsKeyTypeAvailable = requires { typename Type::KeyType; };
+template <typename PType>
+concept IsKeyTypeAvailable = requires { typename PType::KeyType; };
 
-template <typename Type>
-concept IsValueTypeAvailable = requires { typename Type::ValueType; };
+template <typename PType>
+concept IsValueTypeAvailable = requires { typename PType::ValueType; };
 
-template <typename Type>
-concept IsValueAvailable = requires { Type::value; };
+template <typename PType>
+concept IsValueAvailable = requires { PType::value; };
 
 template <class = void> struct Inconstructible {
   ~Inconstructible() = delete;
 };
 
-template <class = void> struct Dummy {};
+using Dummy = Sint;
 
-constexpr const Dummy<> dummy_value;
+constexpr const Dummy dummy_value = {0};
 
-template <typename TargetType> struct RemovePointer : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemovePointer : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemovePointer<TargetType *> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemovePointer<PTargetType *> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemovePointer<TargetType *const> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemovePointer<PTargetType *const> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemovePointer<TargetType *volatile> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemovePointer<PTargetType *volatile> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemovePointer<TargetType *const volatile> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemovePointer<PTargetType *const volatile> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemovePointer<Dummy<>>>);
+static_assert(IsTypeAvailable<RemovePointer<Dummy>>);
 
-template <typename TargetType>
+template <typename PTargetType>
 struct RemoveConstant : public Inconstructible<> {
-  using Type = TargetType;
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemoveConstant<const TargetType> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemoveConstant<const PTargetType> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveConstant<Dummy<>>>);
+static_assert(IsTypeAvailable<RemoveConstant<Dummy>>);
 
-template <typename TargetType>
+template <typename PTargetType>
 struct RemoveVolatile : public Inconstructible<> {
-  using Type = TargetType;
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemoveVolatile<volatile TargetType> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemoveVolatile<volatile PTargetType> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveVolatile<Dummy<>>>);
+static_assert(IsTypeAvailable<RemoveVolatile<Dummy>>);
 
-template <typename TargetType>
+template <typename PTargetType>
 struct RemoveReference : public Inconstructible<> {
-  using Type = TargetType;
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemoveReference<TargetType &> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemoveReference<PTargetType &> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-template <typename TargetType>
-struct RemoveReference<TargetType &&> : public Inconstructible<> {
-  using Type = TargetType;
+template <typename PTargetType>
+struct RemoveReference<PTargetType &&> : public Inconstructible<> {
+  using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveReference<Dummy<>>>);
+static_assert(IsTypeAvailable<RemoveReference<Dummy>>);
 
-template <typename TargetType>
+template <typename PTargetType>
 using AsPure = RemoveConstant<typename RemoveVolatile<
-    typename RemoveReference<TargetType>::Type>::Type>::Type;
+    typename RemoveReference<PTargetType>::Type>::Type>::Type;
 
-template <typename Type, Type Value>
+template <typename PType, PType PValue>
 struct CompileTimeItem : public Inconstructible<> {
-  using ValueType = Type;
-  static constexpr const ValueType value = Value;
+  using ValueType = PType;
+  static constexpr const ValueType value = PValue;
 };
 
-static_assert(IsValueTypeAvailable<CompileTimeItem<Dummy<>, dummy_value>>);
-static_assert(IsValueAvailable<CompileTimeItem<Dummy<>, dummy_value>>);
+static_assert(IsValueTypeAvailable<CompileTimeItem<Dummy, dummy_value>>);
+static_assert(IsValueAvailable<CompileTimeItem<Dummy, dummy_value>>);
 
 using CompileTimeTrue = CompileTimeItem<Bool, true>;
 using CompileTimeFalse = CompileTimeItem<Bool, false>;
 
-template <typename FirstType, typename SecondType>
+template <typename PType>
+struct ConstantQualifiedType : public CompileTimeFalse {};
+
+template <typename PType>
+struct ConstantQualifiedType<const PType> : public CompileTimeTrue {};
+
+template <typename PType>
+struct ConstantQualifiedType<const PType &> : public CompileTimeTrue {};
+
+template <typename PType>
+struct ConstantQualifiedType<const PType &&> : public CompileTimeTrue {};
+
+template <typename PType>
+struct ConstantQualifiedType<const PType *> : public CompileTimeTrue {};
+
+template <typename PType>
+concept IsConstantQualifiedType = ConstantQualifiedType<PType>::value;
+
+template <typename PFirstType, typename PSecondType>
 struct SameType : public CompileTimeFalse {};
 
-template <typename Type>
-struct SameType<Type, Type> : public CompileTimeTrue {};
+template <typename PType>
+struct SameType<PType, PType> : public CompileTimeTrue {};
 
-template <typename FirstType, typename SecondType>
-concept IsSameType = SameType<FirstType, SecondType>::value;
+template <typename PFirstType, typename PSecondType>
+concept IsSameType = SameType<PFirstType, PSecondType>::value;
 
 template <typename FromType, typename ToType>
 concept IsConvertible = requires { ToType(declval<FromType>()); };
 
-template <typename Type>
+template <typename PType>
 concept IsSignedInteger =
-    (IsSameType<AsPure<Type>, Sint8> || IsSameType<AsPure<Type>, Sint16> ||
-     IsSameType<AsPure<Type>, Sint32> || IsSameType<AsPure<Type>, Sint64>);
+    (IsSameType<AsPure<PType>, Sint8> || IsSameType<AsPure<PType>, Sint16> ||
+     IsSameType<AsPure<PType>, Sint32> || IsSameType<AsPure<PType>, Sint64>);
 
-template <typename Type>
+template <typename PType>
 concept IsUnsignedInteger =
-    (IsSameType<AsPure<Type>, Uint8> || IsSameType<AsPure<Type>, Uint16> ||
-     IsSameType<AsPure<Type>, Uint32> || IsSameType<AsPure<Type>, Uint64>);
+    (IsSameType<AsPure<PType>, Uint8> || IsSameType<AsPure<PType>, Uint16> ||
+     IsSameType<AsPure<PType>, Uint32> || IsSameType<AsPure<PType>, Uint64>);
 
-template <typename Type>
-concept IsInteger = IsSignedInteger<Type> || IsUnsignedInteger<Type>;
+template <typename PType>
+concept IsInteger = IsSignedInteger<PType> || IsUnsignedInteger<PType>;
 
-template <typename Type>
+template <typename PType>
 concept IsFloat =
-    (IsSameType<AsPure<Type>, Float32> || IsSameType<AsPure<Type>, Float64>);
+    (IsSameType<AsPure<PType>, Float32> || IsSameType<AsPure<PType>, Float64>);
 
-template <typename Type>
-concept IsNumeric = IsFloat<Type> || IsInteger<Type>;
+template <typename PType>
+concept IsNumeric = IsFloat<PType> || IsInteger<PType>;
 
-template <typename Type>
+template <typename PType>
 concept IsFloatTypeAvailable = requires {
-  typename Type::FloatType;
-  IsFloat<typename Type::FloatType>;
+  typename PType::FloatType;
+  IsFloat<typename PType::FloatType>;
 };
 
-template <typename Type>
+template <typename PType>
 concept IsIntTypeAvailable = requires {
-  typename Type::IntType;
-  IsInteger<typename Type::IntType>;
+  typename PType::IntType;
+  IsInteger<typename PType::IntType>;
 };
 
-template <typename Type>
+template <typename PType>
 concept IsSintTypeAvailable = requires {
-  typename Type::SintType;
-  IsSignedInteger<typename Type::SintType>;
+  typename PType::SintType;
+  IsSignedInteger<typename PType::SintType>;
 };
 
-template <typename Type>
+template <typename PType>
 concept IsUintTypeAvailable = requires {
-  typename Type::UintType;
-  IsUnsignedInteger<typename Type::UintType>;
+  typename PType::UintType;
+  IsUnsignedInteger<typename PType::UintType>;
 };
 
-template <typename Type>
+template <typename PType>
 concept IsSizeTypeAvailable = requires {
-  typename Type::SizeType;
-  IsUnsignedInteger<typename Type::SizeType>;
+  typename PType::SizeType;
+  IsUnsignedInteger<typename PType::SizeType>;
 };
 
-template <typename Type> auto move(Type &&p_object) {
-  return static_cast<typename RemoveReference<Type>::Type &&>(p_object);
-}
-
-template <typename Type>
-auto forward(typename RemoveReference<Type>::Type &&p_object) {
-  return static_cast<Type &&>(p_object);
-}
-
-template <typename Type>
-auto forward(typename RemoveReference<Type>::Type &p_object) {
-  return static_cast<Type &&>(p_object);
-}
-
-template <typename Type>
-concept IsForwardIterator = IsValueTypeAvailable<Type> && requires {
-  { ++declval<Type>() } -> IsSameType<Type &>;
-  { *declval<Type>() } -> IsSameType<typename Type::ValueType>;
-  { declval<Type>() == declval<const Type &>() } -> IsSameType<Bool>;
+template <typename PType>
+concept IsEqualityAvailable = requires {
+  { declval<const PType>() == declval<const PType>() } -> IsSameType<Bool>;
 };
 
-template <typename Type>
-concept IsBidirectionalIterator = IsForwardIterator<Type> && requires {
-  { --declval<Type>() } -> IsSameType<Type &>;
+template <typename PType>
+concept IsOrderingAvailable = requires {
+  { declval<const PType>() < declval<const PType>() } -> IsSameType<Bool>;
 };
 
-template <typename Type>
+template <typename PType>
+concept IsComparable = requires {
+  IsEqualityAvailable<PType>;
+  IsOrderingAvailable<PType>;
+};
+
+template <typename PType> auto move(PType &&p_object) {
+  return static_cast<typename RemoveReference<PType>::PType &&>(p_object);
+}
+
+template <typename PType>
+auto forward(typename RemoveReference<PType>::PType &&p_object) {
+  return static_cast<PType &&>(p_object);
+}
+
+template <typename PType>
+auto forward(typename RemoveReference<PType>::PType &p_object) {
+  return static_cast<PType &&>(p_object);
+}
+
+template <typename PType>
+concept IsForwardIterator = IsValueTypeAvailable<PType> &&
+                            IsEqualityAvailable<const PType> && requires {
+                              { ++declval<PType>() } -> IsSameType<PType &>;
+                              {
+                                *declval<const PType>()
+                              } -> IsSameType<typename PType::ValueType>;
+                            };
+
+template <typename PType>
+concept IsConstantForwardIterator =
+    IsForwardIterator<PType> &&
+    IsConstantQualifiedType<typename PType::ValueType>;
+
+template <typename PType>
+concept IsBidirectionalIterator = IsForwardIterator<PType> && requires {
+  { --declval<PType>() } -> IsSameType<PType &>;
+};
+
+template <typename PType>
+concept IsConstantBidirectionalIterator =
+    IsBidirectionalIterator<PType> &&
+    IsConstantQualifiedType<typename PType::ValueType>;
+
+template <typename PType>
 concept IsRandomAccessIterator =
-    IsBidirectionalIterator<Type> && IsKeyTypeAvailable<Type> && requires {
+    IsBidirectionalIterator<PType> && IsKeyTypeAvailable<PType> && requires {
       {
-        declval<Type>()[declval<typename Type::KeyType>()]
-      } -> IsSameType<typename Type::ValueType>;
+        declval<PType>()[declval<typename PType::KeyType>()]
+      } -> IsSameType<typename PType::ValueType>;
     };
 
-template <typename Type>
-concept IsContiguousIterator = IsRandomAccessIterator<Type> && requires {
-  { declval<Type>() - declval<Type>() } -> IsSameType<SizeType>;
+template <typename PType>
+concept IsConstantRandomAccessIterator =
+    IsRandomAccessIterator<PType> &&
+    IsConstantQualifiedType<typename PType::ValueType>;
+
+template <typename PType>
+concept IsContiguousIterator = IsRandomAccessIterator<PType> && requires {
+  { declval<PType>() - declval<PType>() } -> IsSameType<SizeType>;
 };
 
-template <typename Type>
+template <typename PType>
+concept IsConstantContiguousIterator =
+    IsContiguousIterator<PType> &&
+    IsConstantQualifiedType<typename PType::ValueType>;
+
+template <typename PType>
 concept IsIterable = requires {
-  { declval<Type>().begin() } -> IsForwardIterator;
-  { declval<Type>().end() } -> IsForwardIterator;
+  { declval<PType>().begin() } -> IsForwardIterator;
+  { declval<PType>().end() } -> IsForwardIterator;
 };
 
-template <typename Type>
-concept IsEqualityAvailable = requires {
-  { declval<Type>() == declval<Type>() } -> IsSameType<Bool>;
+template <typename PType>
+concept IsConstantIterable = requires {
+  { declval<const PType>().begin() } -> IsConstantForwardIterator;
+  { declval<const PType>().end() } -> IsConstantForwardIterator;
 };
 
-template <typename Type>
-concept IsOrderingAvailable = requires {
-  { declval<Type>() < declval<Type>() } -> IsSameType<Bool>;
-};
-
-template <typename Type>
-concept IsComparable = requires {
-  IsEqualityAvailable<Type>;
-  IsOrderingAvailable<Type>;
-};
-
-template <typename Type, typename ReturnType, typename... ArgumentTypes>
+template <typename PType, typename ReturnType, typename... ArgumentTypes>
 concept IsCallable = requires {
-  { declval<Type>()(declval<ArgumentTypes>()...) } -> IsSameType<ReturnType>;
+  { declval<PType>()(declval<ArgumentTypes>()...) } -> IsSameType<ReturnType>;
 };
 
-template <typename Type>
-concept IsArithmaticAvailable = IsComparable<Type> && requires {
-  { declval<Type>() + declval<Type>() } -> IsSameType<Type>;
-  { declval<Type>() - declval<Type>() } -> IsSameType<Type>;
-  { declval<Type>() * declval<Type>() } -> IsSameType<Type>;
-  { declval<Type>() / declval<Type>() } -> IsSameType<Type>;
+template <typename PType>
+concept IsArithmaticAvailable = IsComparable<PType> && requires {
+  { declval<const PType>() + declval<const PType>() } -> IsSameType<PType>;
+  { declval<const PType>() - declval<const PType>() } -> IsSameType<PType>;
+  { declval<const PType>() * declval<const PType>() } -> IsSameType<PType>;
+  { declval<const PType>() / declval<const PType>() } -> IsSameType<PType>;
 };
 
 template <typename DerivedType, typename BaseType>
 concept IsBaseType = IsConvertible<DerivedType *, BaseType *>;
 
-template <typename Type>
-concept IsInconstructible = IsBaseType<Type, Inconstructible<>>;
+template <typename PType>
+concept IsInconstructible = IsBaseType<PType, Inconstructible<>>;
 
 template <class = void> struct Configuration : public Inconstructible<> {
   using SizeType = Vessel::SizeType;
@@ -305,8 +352,8 @@ template <class = void> struct Configuration : public Inconstructible<> {
   using FloatType = Vessel::Float;
 };
 
-template <typename Type>
-concept IsConfiguration = IsBaseType<Type, Configuration<>>;
+template <typename PType>
+concept IsConfiguration = IsBaseType<PType, Configuration<>>;
 
 } // namespace Vessel
 

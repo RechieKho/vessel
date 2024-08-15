@@ -5,20 +5,25 @@
 
 namespace Vessel {
 
+template <typename PType>
+concept IsSpanSubTypesAvailable =
+    IsViewSubTypesAvailable<PType> && IsComparable<typename PType::ValueType> &&
+    IsSameType<typename PType::KeyType, SizeType>;
+
 /// A view of contiguous memory.
-template <typename Type>
-concept IsSpan = IsView<Type> && IsComparable<Type> &&
-                 IsComparable<typename Type::ValueType> &&
-                 IsSameType<typename Type::KeyType, SizeType> && requires {
-                   {
-                     declval<Type>().slice(declval<typename Type::KeyType>(),
-                                           declval<typename Type::KeyType>())
-                   } -> IsSameType<Type>;
-                   {
-                     Type(declval<typename Type::ValueType *>(),
-                          declval<typename Type::SizeType>())
-                   } -> IsSameType<Type>;
-                 };
+template <typename PType>
+concept IsSpan =
+    IsSpanSubTypesAvailable<PType> && IsView<PType> && IsComparable<PType> &&
+    requires {
+      {
+        declval<const PType>().slice(declval<typename PType::KeyType>(),
+                                     declval<typename PType::KeyType>())
+      } -> IsSameType<PType>;
+      {
+        PType(declval<typename PType::ValueType *>(),
+              declval<typename PType::SizeType>())
+      } -> IsSameType<PType>;
+    };
 
 } // namespace Vessel
 

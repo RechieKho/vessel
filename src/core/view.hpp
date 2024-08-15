@@ -6,19 +6,28 @@
 
 namespace Vessel {
 
-/// An immutable, non-owning collection of data.
-template <typename Type>
-concept IsView =
-    requires { typename Type::CloneType; } && IsCollection<Type> &&
-    IsContainer<typename Type::ContainerType> &&
-    IsSameType<typename Type::ContainerType::KeyType, typename Type::KeyType> &&
-    IsSameType<typename Type::ContainerType::ValueType,
-               typename Type::ValueType> &&
+template <typename PType>
+concept IsViewSubTypesAvailable =
     requires {
+      typename PType::CloneType;
+      typename PType::ContainerType;
+    } && IsContainerSubTypesAvailable<PType> &&
+    IsContainer<typename PType::ContainerType> &&
+    IsSameType<typename PType::ContainerType::KeyType,
+               typename PType::KeyType> &&
+    IsSameType<typename PType::ContainerType::ValueType,
+               typename PType::ValueType>;
+
+/// An immutable, non-owning collection of data.
+template <typename PType>
+concept IsView =
+    IsViewSubTypesAvailable<PType> && IsCollection<PType> && requires {
       {
-        declval<Type>()[declval<typename Type::KeyType>()]
-      } -> IsSameType<const typename Type::ValueType &>;
-      { declval<Type>().clone() } -> IsSameType<typename Type::CloneType>;
+        declval<const PType>()[declval<typename PType::KeyType>()]
+      } -> IsSameType<const typename PType::ValueType &>;
+      {
+        declval<const PType>().clone()
+      } -> IsSameType<typename PType::CloneType>;
     };
 
 } // namespace Vessel

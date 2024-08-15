@@ -5,27 +5,32 @@
 
 namespace Vessel {
 
+template <typename PType>
+concept IsListSubTypesAvailable =
+    IsContainerSubTypesAvailable<PType> &&
+    IsComparable<typename PType::ValueType> &&
+    IsSameType<typename PType::KeyType, typename PType::SizeType>;
+
 /// A container with element arranged in series.
-template <typename Type>
+template <typename PType>
 concept IsList =
-    IsContainer<Type> && IsComparable<Type> &&
-    IsComparable<typename Type::ValueType> &&
-    IsSameType<typename Type::KeyType, typename Type::SizeType> && requires {
+    IsListSubTypesAvailable<PType> && IsContainer<PType> &&
+    IsComparable<PType> && requires {
       {
-        declval<const Type>().slice(declval<typename Type::KeyType>(),
-                                    declval<typename Type::KeyType>())
-      } -> IsSameType<Type>;
+        declval<const PType>().slice(declval<typename PType::KeyType>(),
+                                     declval<typename PType::KeyType>())
+      } -> IsSameType<PType>;
       {
-        declval<Type>() << declval<typename Type::ValueType>()
-      } -> IsSameType<Type &>;
+        declval<PType>() << declval<typename PType::ValueType>()
+      } -> IsSameType<PType &>;
       {
-        declval<Type>().push_back(declval<typename Type::ValueType>())
+        declval<PType>().push_back(declval<typename PType::ValueType>())
       } -> IsSameType<void>;
       {
-        declval<Type>().push_front(declval<typename Type::ValueType>())
+        declval<PType>().push_front(declval<typename PType::ValueType>())
       } -> IsSameType<void>;
-      { declval<Type>().pop_back() } -> IsSameType<typename Type::ValueType>;
-      { declval<Type>().pop_front() } -> IsSameType<typename Type::ValueType>;
+      { declval<PType>().pop_back() } -> IsSameType<typename PType::ValueType>;
+      { declval<PType>().pop_front() } -> IsSameType<typename PType::ValueType>;
     };
 
 } // namespace Vessel
