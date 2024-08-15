@@ -25,7 +25,7 @@ struct DefaultBinaryTreeMapConfiguration : public Configuration<> {
   static constexpr const SizeType max_depth_difference = 8;
 };
 static_assert(IsBinaryTreeMapConfiguration<
-              DefaultBinaryTreeMapConfiguration<Dummy, Dummy>>);
+              DefaultBinaryTreeMapConfiguration<DummyScalar, DummyScalar>>);
 
 template <IsBinaryTreeMapConfiguration PConfigurationType>
 class BinaryTreeMapImplementation {
@@ -143,7 +143,7 @@ template <typename KeyType, typename ValueType>
 using BinaryTreeMap = BinaryTreeMapImplementation<
     DefaultBinaryTreeMapConfiguration<KeyType, ValueType>>;
 
-static_assert(IsMap<BinaryTreeMap<Dummy, Dummy>>);
+static_assert(IsMap<BinaryTreeMap<DummyScalar, DummyScalar>>);
 
 } // namespace Vessel
 

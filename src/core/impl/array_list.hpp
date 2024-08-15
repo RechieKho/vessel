@@ -20,7 +20,8 @@ struct DefaultArrayListConfiguration : public Configuration<> {
   using KeyType = SizeType;
   static constexpr const SizeType initial_capacity = 16;
 };
-static_assert(IsArrayListConfiguration<DefaultArrayListConfiguration<Dummy>>);
+static_assert(
+    IsArrayListConfiguration<DefaultArrayListConfiguration<DummyScalar>>);
 
 template <IsArrayListConfiguration PConfigurationType>
 class ArrayListImplementation {
@@ -144,7 +145,7 @@ public:
 template <typename PType>
 using ArrayList = ArrayListImplementation<DefaultArrayListConfiguration<PType>>;
 
-static_assert(IsList<ArrayList<Dummy>>);
+static_assert(IsList<ArrayList<DummyScalar>>);
 
 } // namespace Vessel
 

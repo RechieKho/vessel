@@ -25,6 +25,9 @@ using Float = Float32;
 
 using Bool = bool;
 
+constexpr const auto null_pointer = nullptr;
+using NullPointer = decltype(null_pointer);
+
 template <typename ReturnType, typename... ArgumentType>
 using Function = ReturnType(ArgumentType...);
 
@@ -69,9 +72,11 @@ template <class = void> struct Inconstructible {
   ~Inconstructible() = delete;
 };
 
-using Dummy = Sint;
+using DummyScalar = Sint;
+constexpr const DummyScalar dummy_scalar_value = {};
 
-constexpr const Dummy dummy_value = {0};
+template <class = void> struct DummyClass {};
+constexpr const DummyClass<> dummy_class_value = {};
 
 template <typename PTargetType>
 struct RemovePointer : public Inconstructible<> {
@@ -98,7 +103,7 @@ struct RemovePointer<PTargetType *const volatile> : public Inconstructible<> {
   using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemovePointer<Dummy>>);
+static_assert(IsTypeAvailable<RemovePointer<DummyScalar>>);
 
 template <typename PTargetType>
 struct RemoveConstant : public Inconstructible<> {
@@ -110,7 +115,7 @@ struct RemoveConstant<const PTargetType> : public Inconstructible<> {
   using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveConstant<Dummy>>);
+static_assert(IsTypeAvailable<RemoveConstant<DummyScalar>>);
 
 template <typename PTargetType>
 struct RemoveVolatile : public Inconstructible<> {
@@ -122,7 +127,7 @@ struct RemoveVolatile<volatile PTargetType> : public Inconstructible<> {
   using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveVolatile<Dummy>>);
+static_assert(IsTypeAvailable<RemoveVolatile<DummyScalar>>);
 
 template <typename PTargetType>
 struct RemoveReference : public Inconstructible<> {
@@ -139,7 +144,7 @@ struct RemoveReference<PTargetType &&> : public Inconstructible<> {
   using Type = PTargetType;
 };
 
-static_assert(IsTypeAvailable<RemoveReference<Dummy>>);
+static_assert(IsTypeAvailable<RemoveReference<DummyScalar>>);
 
 template <typename PTargetType>
 using AsPure = RemoveConstant<typename RemoveVolatile<
@@ -151,8 +156,10 @@ struct CompileTimeItem : public Inconstructible<> {
   static constexpr const ValueType value = PValue;
 };
 
-static_assert(IsValueTypeAvailable<CompileTimeItem<Dummy, dummy_value>>);
-static_assert(IsValueAvailable<CompileTimeItem<Dummy, dummy_value>>);
+static_assert(
+    IsValueTypeAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
+static_assert(
+    IsValueAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
 
 using CompileTimeTrue = CompileTimeItem<Bool, true>;
 using CompileTimeFalse = CompileTimeItem<Bool, false>;
@@ -186,6 +193,9 @@ concept IsSameType = SameType<PFirstType, PSecondType>::value;
 
 template <typename FromType, typename ToType>
 concept IsConvertible = requires { ToType(declval<FromType>()); };
+
+template <typename PType>
+concept IsNullPointer = IsSameType<NullPointer, PType>;
 
 template <typename PType>
 concept IsSignedInteger =
@@ -236,6 +246,22 @@ concept IsSizeTypeAvailable = requires {
   typename PType::SizeType;
   IsUnsignedInteger<typename PType::SizeType>;
 };
+
+template <typename PType> struct MemberPointerType : public CompileTimeFalse {};
+
+template <typename PType, typename PClassType>
+struct MemberPointerType<PType PClassType::*> : public CompileTimeTrue {};
+
+template <typename PType>
+concept IsMemberPointerType = MemberPointerType<PType>::value;
+
+template <typename PType> struct PointerType : public CompileTimeFalse {};
+
+template <typename PType>
+struct PointerType<PType *> : public CompileTimeTrue {};
+
+template <typename PType>
+concept IsPointerType = PointerType<PType>::value;
 
 template <typename PType>
 concept IsEqualityAvailable = requires {
@@ -354,6 +380,24 @@ template <class = void> struct Configuration : public Inconstructible<> {
 
 template <typename PType>
 concept IsConfiguration = IsBaseType<PType, Configuration<>>;
+
+template <typename PType>
+concept IsHolder = IsValueTypeAvailable<PType> && requires {
+  { declval<PType>().operator->() } -> IsSameType<typename PType::ValueType>;
+  {
+    declval<const PType>().operator->()
+  } -> IsSameType<const typename PType::ValueType>;
+};
+
+template <typename PType>
+concept IsMovable = requires {
+  { PType(declval<PType &&>()) } -> IsSameType<PType>;
+};
+
+template <typename PType>
+concept IsCopyable = requires {
+  { PType(declval<const PType &>()) } -> IsSameType<PType>;
+};
 
 } // namespace Vessel
 
