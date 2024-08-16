@@ -91,18 +91,19 @@ auto test_uint_span_slice() -> void {
 
 template <IsSpan SpanType>
   requires IsUnsignedInteger<typename SpanType::ValueType>
-auto test_uint_span_clone() -> void {
+auto test_uint_span_copy() -> void {
   const auto data = Uint[]{1, 2, 3, 4, 5};
   const auto count = sizeof(data) / sizeof(data[0]);
   auto span = SpanType(data, count);
 
-  auto cloned = span.clone();
+  auto copied = typename SpanType::ContainerType(span);
+  REQUIRE(copied == span); // Copied should be the same as the original.
 
-  cloned[0] = 5; // Cloned should be owned, thus writable.
+  copied[0] = 5; // Copied should be owned, thus writable.
 
-  REQUIRE(cloned[0] == 5);
-  REQUIRE(cloned[0] !=
-          span[0]); // Cloned shouldn't have the same memory as span.
+  REQUIRE(copied[0] == 5);
+  REQUIRE(copied[0] !=
+          span[0]); // Copied shouldn't have the same memory as span.
 }
 
 template <IsSpan SpanType>
@@ -128,7 +129,7 @@ auto test_uint_span() -> void {
   test_uint_span_iteration<SpanType>();
   test_uint_span_compare<SpanType>();
   test_uint_span_slice<SpanType>();
-  test_uint_span_clone<SpanType>();
+  test_uint_span_copy<SpanType>();
   test_uint_span_contain<SpanType>();
 }
 

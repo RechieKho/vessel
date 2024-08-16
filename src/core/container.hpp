@@ -12,8 +12,9 @@ concept IsContainerSubTypesAvailable = IsCollectionSubTypesAvailable<PType>;
 /// A mutable, owned collection of data.
 template <typename PType>
 concept IsContainer =
-    IsContainerSubTypesAvailable<PType> && IsCollection<PType> && requires {
-      { declval<const PType>().clone() } -> IsSameType<PType>;
+    IsContainerSubTypesAvailable<PType> && IsCollection<PType> &&
+    IsCopyableFrom<PType> && IsMovableFrom<PType> &&
+    IsDefaultConstructible<PType> && requires {
       {
         declval<PType>()[declval<typename PType::KeyType>()]
       } -> IsSameType<typename PType::ValueType &>;

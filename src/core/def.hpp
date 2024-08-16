@@ -215,8 +215,27 @@ static_assert(IsConstantQualifiedType<const DummyScalar &&>);
 static_assert(!IsConstantQualifiedType<const DummyScalar *>);
 static_assert(IsConstantQualifiedType<const DummyScalar *const>);
 
-template <typename FromType, typename ToType>
-concept IsConvertible = requires { ToType(declval<FromType>()); };
+template <typename PType>
+concept IsDestructible = requires { declval<PType>().~PType(); };
+
+template <typename PType>
+concept IsInconstructible = !IsDestructible<PType>;
+
+template <typename PType>
+concept IsDefaultConstructible = requires {
+  { PType() } -> IsSameType<PType>;
+};
+
+template <typename PToType, typename PFromType>
+concept IsConstructibleFrom = requires {
+  { PToType(declval<PFromType>()) } -> IsSameType<PToType>;
+};
+
+template <typename PToType, typename PFromType = PToType>
+concept IsMovableFrom = IsConstructibleFrom<PToType, PFromType &&>;
+
+template <typename PToType, typename PFromType = PToType>
+concept IsCopyableFrom = IsConstructibleFrom<PToType, const PFromType &&>;
 
 template <typename PType>
 concept IsNullPointer = IsSameType<NullPointer, PType>;
@@ -304,7 +323,7 @@ concept IsComparable = requires {
 };
 
 template <typename PType> auto move(PType &&p_object) {
-  return static_cast<typename RemoveReference<PType>::PType &&>(p_object);
+  return static_cast<typename RemoveReference<PType>::Type &&>(p_object);
 }
 
 template <typename PType>
@@ -390,10 +409,7 @@ concept IsArithmaticAvailable = IsComparable<PType> && requires {
 };
 
 template <typename DerivedType, typename BaseType>
-concept IsBaseType = IsConvertible<DerivedType *, BaseType *>;
-
-template <typename PType>
-concept IsInconstructible = IsBaseType<PType, Inconstructible<>>;
+concept IsBaseType = IsConstructibleFrom<BaseType *, DerivedType *>;
 
 template <class = void> struct Configuration : public Inconstructible<> {
   using SizeType = Vessel::SizeType;
@@ -411,16 +427,6 @@ concept IsHolder = IsValueTypeAvailable<PType> && requires {
   {
     declval<const PType>().operator->()
   } -> IsSameType<const typename PType::ValueType>;
-};
-
-template <typename PType>
-concept IsMovable = requires {
-  { PType(declval<PType &&>()) } -> IsSameType<PType>;
-};
-
-template <typename PType>
-concept IsCopyable = requires {
-  { PType(declval<const PType &>()) } -> IsSameType<PType>;
 };
 
 } // namespace Vessel

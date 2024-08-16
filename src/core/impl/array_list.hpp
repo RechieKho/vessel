@@ -123,10 +123,6 @@ public:
 
   auto pop_front() -> ValueType { throw UnimplementedException(); }
 
-  auto clone() const -> ArrayListImplementation {
-    throw UnimplementedException();
-  }
-
   auto get_count() const -> SizeType { throw UnimplementedException(); }
 
   auto contain(const ValueType &p_value) const -> Bool {

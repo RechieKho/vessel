@@ -8,10 +8,8 @@ namespace Vessel {
 
 template <typename PType>
 concept IsViewSubTypesAvailable =
-    requires {
-      typename PType::CloneType;
-      typename PType::ContainerType;
-    } && IsContainerSubTypesAvailable<PType> &&
+    requires { typename PType::ContainerType; } &&
+    IsCollectionSubTypesAvailable<PType> &&
     IsContainer<typename PType::ContainerType> &&
     IsSameType<typename PType::ContainerType::KeyType,
                typename PType::KeyType> &&
@@ -21,13 +19,11 @@ concept IsViewSubTypesAvailable =
 /// An immutable, non-owning collection of data.
 template <typename PType>
 concept IsView =
-    IsViewSubTypesAvailable<PType> && IsCollection<PType> && requires {
+    IsViewSubTypesAvailable<PType> && IsCollection<PType> &&
+    IsCopyableFrom<typename PType::ContainerType, PType> && requires {
       {
         declval<const PType>()[declval<typename PType::KeyType>()]
       } -> IsSameType<const typename PType::ValueType &>;
-      {
-        declval<const PType>().clone()
-      } -> IsSameType<typename PType::CloneType>;
     };
 
 } // namespace Vessel

@@ -189,20 +189,40 @@ auto test_uint_list_slice() -> void {
 
 template <IsList ListType>
   requires IsUnsignedInteger<typename ListType::ValueType>
-auto test_uint_list_clone() -> void {
+auto test_uint_list_copy() -> void {
   auto list = ListType();
   list.push_back(1);
   list.push_back(2);
   list.push_back(3);
   list.push_back(4);
 
-  auto cloned = list.clone();
+  auto copied = ListType(list);
+  REQUIRE(copied == list); // Copied should be the same as the original.
 
-  cloned[0] = 5; // Cloned should be owned, thus writable.
+  copied[0] = 5; // Copied should be owned, thus writable.
 
-  REQUIRE(cloned[0] == 5);
-  REQUIRE(cloned[0] !=
-          list[0]); // Cloned shouldn't have the same memory as list.
+  REQUIRE(copied[0] == 5);
+  REQUIRE(copied[0] !=
+          list[0]); // Copied shouldn't have the same memory as list.
+}
+
+template <IsList ListType>
+  requires IsUnsignedInteger<typename ListType::ValueType>
+auto test_uint_list_move() -> void {
+  auto list = ListType();
+  list.push_back(1);
+  list.push_back(2);
+  list.push_back(3);
+  list.push_back(4);
+
+  auto moved = move(ListType(list));
+
+  REQUIRE(list == ListType()); // Original should be empty.
+  REQUIRE(moved[0] == 5);
+  REQUIRE(moved[1] == 2);
+  REQUIRE(moved[2] == 3);
+  REQUIRE(moved[3] == 4);
+  REQUIRE_THROWS(moved[4]);
 }
 
 template <IsList ListType>
@@ -234,7 +254,8 @@ auto test_uint_list() -> void {
   test_uint_list_iteration<ListType>();
   test_uint_list_compare<ListType>();
   test_uint_list_slice<ListType>();
-  test_uint_list_clone<ListType>();
+  test_uint_list_copy<ListType>();
+  test_uint_list_move<ListType>();
   test_uint_list_contain<ListType>();
 }
 

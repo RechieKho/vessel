@@ -104,10 +104,6 @@ public:
     throw UnimplementedException();
   }
 
-  auto clone() const -> BinaryTreeMapImplementation {
-    throw UnimplementedException();
-  }
-
   auto operator[](const KeyType &p_key) -> ValueType & {
     throw UnimplementedException();
   }
