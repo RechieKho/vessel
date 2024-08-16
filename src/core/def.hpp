@@ -78,6 +78,29 @@ constexpr const DummyScalar dummy_scalar_value = {};
 template <class = void> struct DummyClass {};
 constexpr const DummyClass<> dummy_class_value = {};
 
+template <typename PType, PType PValue>
+struct CompileTimeItem : public Inconstructible<> {
+  using ValueType = PType;
+  static constexpr const ValueType value = PValue;
+};
+
+static_assert(
+    IsValueTypeAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
+static_assert(
+    IsValueAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
+
+using CompileTimeTrue = CompileTimeItem<Bool, true>;
+using CompileTimeFalse = CompileTimeItem<Bool, false>;
+
+template <typename PFirstType, typename PSecondType>
+struct SameType : public CompileTimeFalse {};
+
+template <typename PType>
+struct SameType<PType, PType> : public CompileTimeTrue {};
+
+template <typename PFirstType, typename PSecondType>
+concept IsSameType = SameType<PFirstType, PSecondType>::value;
+
 template <typename PTargetType>
 struct RemovePointer : public Inconstructible<> {
   using Type = PTargetType;
@@ -115,6 +138,16 @@ struct RemoveConstant<const PTargetType> : public Inconstructible<> {
   using Type = PTargetType;
 };
 
+template <typename PTargetType>
+struct RemoveConstant<const PTargetType &> : public Inconstructible<> {
+  using Type = PTargetType &;
+};
+
+template <typename PTargetType>
+struct RemoveConstant<const PTargetType &&> : public Inconstructible<> {
+  using Type = PTargetType &&;
+};
+
 static_assert(IsTypeAvailable<RemoveConstant<DummyScalar>>);
 
 template <typename PTargetType>
@@ -125,6 +158,16 @@ struct RemoveVolatile : public Inconstructible<> {
 template <typename PTargetType>
 struct RemoveVolatile<volatile PTargetType> : public Inconstructible<> {
   using Type = PTargetType;
+};
+
+template <typename PTargetType>
+struct RemoveVolatile<volatile PTargetType &> : public Inconstructible<> {
+  using Type = PTargetType &;
+};
+
+template <typename PTargetType>
+struct RemoveVolatile<volatile PTargetType &&> : public Inconstructible<> {
+  using Type = PTargetType &&;
 };
 
 static_assert(IsTypeAvailable<RemoveVolatile<DummyScalar>>);
@@ -150,20 +193,6 @@ template <typename PTargetType>
 using AsPure = RemoveConstant<typename RemoveVolatile<
     typename RemoveReference<PTargetType>::Type>::Type>::Type;
 
-template <typename PType, PType PValue>
-struct CompileTimeItem : public Inconstructible<> {
-  using ValueType = PType;
-  static constexpr const ValueType value = PValue;
-};
-
-static_assert(
-    IsValueTypeAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
-static_assert(
-    IsValueAvailable<CompileTimeItem<DummyScalar, dummy_scalar_value>>);
-
-using CompileTimeTrue = CompileTimeItem<Bool, true>;
-using CompileTimeFalse = CompileTimeItem<Bool, false>;
-
 template <typename PType>
 struct ConstantQualifiedType : public CompileTimeFalse {};
 
@@ -177,19 +206,14 @@ template <typename PType>
 struct ConstantQualifiedType<const PType &&> : public CompileTimeTrue {};
 
 template <typename PType>
-struct ConstantQualifiedType<const PType *> : public CompileTimeTrue {};
-
-template <typename PType>
 concept IsConstantQualifiedType = ConstantQualifiedType<PType>::value;
 
-template <typename PFirstType, typename PSecondType>
-struct SameType : public CompileTimeFalse {};
-
-template <typename PType>
-struct SameType<PType, PType> : public CompileTimeTrue {};
-
-template <typename PFirstType, typename PSecondType>
-concept IsSameType = SameType<PFirstType, PSecondType>::value;
+static_assert(!IsConstantQualifiedType<DummyScalar>);
+static_assert(IsConstantQualifiedType<const DummyScalar>);
+static_assert(IsConstantQualifiedType<const DummyScalar &>);
+static_assert(IsConstantQualifiedType<const DummyScalar &&>);
+static_assert(!IsConstantQualifiedType<const DummyScalar *>);
+static_assert(IsConstantQualifiedType<const DummyScalar *const>);
 
 template <typename FromType, typename ToType>
 concept IsConvertible = requires { ToType(declval<FromType>()); };
