@@ -411,23 +411,18 @@ concept IsArithmaticAvailable = IsComparable<PType> && requires {
 template <typename DerivedType, typename BaseType>
 concept IsBaseType = IsConstructibleFrom<BaseType *, DerivedType *>;
 
+template <typename PType>
+concept IsConfiguration =
+    IsSizeTypeAvailable<PType> && IsSintTypeAvailable<PType> &&
+    IsUintTypeAvailable<PType> && IsFloatTypeAvailable<PType>;
+
 template <class = void> struct Configuration : public Inconstructible<> {
   using SizeType = Vessel::SizeType;
   using SintType = Vessel::Sint;
   using UintType = Vessel::Uint;
   using FloatType = Vessel::Float;
 };
-
-template <typename PType>
-concept IsConfiguration = IsBaseType<PType, Configuration<>>;
-
-template <typename PType>
-concept IsHolder = IsValueTypeAvailable<PType> && requires {
-  { declval<PType>().operator->() } -> IsSameType<typename PType::ValueType>;
-  {
-    declval<const PType>().operator->()
-  } -> IsSameType<const typename PType::ValueType>;
-};
+static_assert(IsConfiguration<Configuration<>>);
 
 } // namespace Vessel
 
