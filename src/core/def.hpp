@@ -81,7 +81,7 @@ constexpr const DummyClass<> dummy_class_value = {};
 template <typename PType, PType PValue>
 struct CompileTimeItem : public Inconstructible<> {
   using ValueType = PType;
-  static constexpr const ValueType value = PValue;
+  static constexpr const auto value = PValue;
 };
 
 static_assert(
