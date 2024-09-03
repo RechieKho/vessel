@@ -241,53 +241,60 @@ template <typename PType>
 concept IsNullPointer = IsSameType<NullPointer, PType>;
 
 template <typename PType>
-concept IsSignedInteger =
-    (IsSameType<AsPure<PType>, Sint8> || IsSameType<AsPure<PType>, Sint16> ||
-     IsSameType<AsPure<PType>, Sint32> || IsSameType<AsPure<PType>, Sint64>);
+concept IsSignedInteger = requires {
+  requires(
+      IsSameType<AsPure<PType>, Sint8> || IsSameType<AsPure<PType>, Sint16> ||
+      IsSameType<AsPure<PType>, Sint32> || IsSameType<AsPure<PType>, Sint64>);
+};
 
 template <typename PType>
-concept IsUnsignedInteger =
-    (IsSameType<AsPure<PType>, Uint8> || IsSameType<AsPure<PType>, Uint16> ||
-     IsSameType<AsPure<PType>, Uint32> || IsSameType<AsPure<PType>, Uint64>);
+concept IsUnsignedInteger = requires {
+  requires(
+      IsSameType<AsPure<PType>, Uint8> || IsSameType<AsPure<PType>, Uint16> ||
+      IsSameType<AsPure<PType>, Uint32> || IsSameType<AsPure<PType>, Uint64>);
+};
 
 template <typename PType>
-concept IsInteger = IsSignedInteger<PType> || IsUnsignedInteger<PType>;
+concept IsInteger =
+    requires { requires IsSignedInteger<PType> || IsUnsignedInteger<PType>; };
 
 template <typename PType>
-concept IsFloat =
-    (IsSameType<AsPure<PType>, Float32> || IsSameType<AsPure<PType>, Float64>);
+concept IsFloat = requires {
+  requires(IsSameType<AsPure<PType>, Float32> ||
+           IsSameType<AsPure<PType>, Float64>);
+};
 
 template <typename PType>
-concept IsNumeric = IsFloat<PType> || IsInteger<PType>;
+concept IsNumeric = requires { requires IsFloat<PType> || IsInteger<PType>; };
 
 template <typename PType>
 concept IsFloatTypeAvailable = requires {
   typename PType::FloatType;
-  IsFloat<typename PType::FloatType>;
+  requires IsFloat<typename PType::FloatType>;
 };
 
 template <typename PType>
 concept IsIntTypeAvailable = requires {
   typename PType::IntType;
-  IsInteger<typename PType::IntType>;
+  requires IsInteger<typename PType::IntType>;
 };
 
 template <typename PType>
 concept IsSintTypeAvailable = requires {
   typename PType::SintType;
-  IsSignedInteger<typename PType::SintType>;
+  requires IsSignedInteger<typename PType::SintType>;
 };
 
 template <typename PType>
 concept IsUintTypeAvailable = requires {
   typename PType::UintType;
-  IsUnsignedInteger<typename PType::UintType>;
+  requires IsUnsignedInteger<typename PType::UintType>;
 };
 
 template <typename PType>
 concept IsSizeTypeAvailable = requires {
   typename PType::SizeType;
-  IsUnsignedInteger<typename PType::SizeType>;
+  requires IsUnsignedInteger<typename PType::SizeType>;
 };
 
 template <typename PType> struct MemberPointerType : public CompileTimeFalse {};
@@ -318,8 +325,8 @@ concept IsOrderingAvailable = requires {
 
 template <typename PType>
 concept IsComparable = requires {
-  IsEqualityAvailable<PType>;
-  IsOrderingAvailable<PType>;
+  requires IsEqualityAvailable<PType>;
+  requires IsOrderingAvailable<PType>;
 };
 
 template <typename PType> auto move(PType &&p_object) {
@@ -337,51 +344,60 @@ auto forward(typename RemoveReference<PType>::PType &p_object) {
 }
 
 template <typename PType>
-concept IsForwardIterator = IsValueTypeAvailable<PType> &&
-                            IsEqualityAvailable<const PType> && requires {
-                              { ++declval<PType>() } -> IsSameType<PType &>;
-                              {
-                                *declval<const PType>()
-                              } -> IsSameType<typename PType::ValueType>;
-                            };
+concept IsForwardIterator = requires {
+  requires IsValueTypeAvailable<PType>;
+  requires IsEqualityAvailable<const PType>;
+
+  { ++declval<PType>() } -> IsSameType<PType &>;
+  { *declval<const PType>() } -> IsSameType<typename PType::ValueType>;
+};
 
 template <typename PType>
-concept IsConstantForwardIterator =
-    IsForwardIterator<PType> &&
-    IsConstantQualifiedType<typename PType::ValueType>;
+concept IsConstantForwardIterator = requires {
+  requires IsForwardIterator<PType>;
+  requires IsConstantQualifiedType<typename PType::ValueType>;
+};
 
 template <typename PType>
-concept IsBidirectionalIterator = IsForwardIterator<PType> && requires {
+concept IsBidirectionalIterator = requires {
+  requires IsForwardIterator<PType>;
+
   { --declval<PType>() } -> IsSameType<PType &>;
 };
 
 template <typename PType>
-concept IsConstantBidirectionalIterator =
-    IsBidirectionalIterator<PType> &&
-    IsConstantQualifiedType<typename PType::ValueType>;
+concept IsConstantBidirectionalIterator = requires {
+  requires IsBidirectionalIterator<PType>;
+  requires IsConstantQualifiedType<typename PType::ValueType>;
+};
 
 template <typename PType>
-concept IsRandomAccessIterator =
-    IsBidirectionalIterator<PType> && IsKeyTypeAvailable<PType> && requires {
-      {
-        declval<PType>()[declval<typename PType::KeyType>()]
-      } -> IsSameType<typename PType::ValueType>;
-    };
+concept IsRandomAccessIterator = requires {
+  requires IsBidirectionalIterator<PType>;
+  requires IsKeyTypeAvailable<PType>;
+
+  {
+    declval<PType>()[declval<typename PType::KeyType>()]
+  } -> IsSameType<typename PType::ValueType>;
+};
 
 template <typename PType>
-concept IsConstantRandomAccessIterator =
-    IsRandomAccessIterator<PType> &&
-    IsConstantQualifiedType<typename PType::ValueType>;
+concept IsConstantRandomAccessIterator = requires {
+  requires IsRandomAccessIterator<PType>;
+  requires IsConstantQualifiedType<typename PType::ValueType>;
+};
 
 template <typename PType>
-concept IsContiguousIterator = IsRandomAccessIterator<PType> && requires {
+concept IsContiguousIterator = requires {
+  requires IsRandomAccessIterator<PType>;
   { declval<PType>() - declval<PType>() } -> IsSameType<SizeType>;
 };
 
 template <typename PType>
-concept IsConstantContiguousIterator =
-    IsContiguousIterator<PType> &&
-    IsConstantQualifiedType<typename PType::ValueType>;
+concept IsConstantContiguousIterator = requires {
+  requires IsContiguousIterator<PType>;
+  requires IsConstantQualifiedType<typename PType::ValueType>;
+};
 
 template <typename PType>
 concept IsIterable = requires {
@@ -401,7 +417,8 @@ concept IsCallable = requires {
 };
 
 template <typename PType>
-concept IsArithmaticAvailable = IsComparable<PType> && requires {
+concept IsArithmaticAvailable = requires {
+  requires IsComparable<PType>;
   { declval<const PType>() + declval<const PType>() } -> IsSameType<PType>;
   { declval<const PType>() - declval<const PType>() } -> IsSameType<PType>;
   { declval<const PType>() * declval<const PType>() } -> IsSameType<PType>;
@@ -412,9 +429,12 @@ template <typename DerivedType, typename BaseType>
 concept IsBaseType = IsConstructibleFrom<BaseType *, DerivedType *>;
 
 template <typename PType>
-concept IsConfiguration =
-    IsSizeTypeAvailable<PType> && IsSintTypeAvailable<PType> &&
-    IsUintTypeAvailable<PType> && IsFloatTypeAvailable<PType>;
+concept IsConfiguration = requires {
+  requires IsSizeTypeAvailable<PType>;
+  requires IsSintTypeAvailable<PType>;
+  requires IsUintTypeAvailable<PType>;
+  requires IsFloatTypeAvailable<PType>;
+};
 
 template <class = void> struct Configuration : public Inconstructible<> {
   using SizeType = Vessel::SizeType;

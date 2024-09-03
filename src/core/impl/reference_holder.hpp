@@ -7,8 +7,12 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsReferenceHolder = IsHolder<PType> && IsEqualityAvailable<PType> &&
-                            IsCopyableFrom<PType> && IsMovableFrom<PType>;
+concept IsReferenceHolder = requires {
+  requires IsHolder<PType>;
+  requires IsEqualityAvailable<PType>;
+  requires IsCopyableFrom<PType>;
+  requires IsMovableFrom<PType>;
+};
 
 template <typename PType, IsReleaser PReleaserType = Releaser<PType>>
 class ReferenceHolder {

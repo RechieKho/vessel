@@ -7,8 +7,11 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsUniqueHolder =
-    IsHolder<PType> && !IsCopyableFrom<PType> && IsMovableFrom<PType>;
+concept IsUniqueHolder = requires {
+  requires IsHolder<PType>;
+  requires !IsCopyableFrom<PType>;
+  requires IsMovableFrom<PType>;
+};
 
 template <typename PType, IsReleaser PReleaserType = Releaser<PType>>
 class UniqueHolder {

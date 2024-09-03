@@ -9,12 +9,14 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsBinaryTreeMapConfiguration =
-    IsConfiguration<PType> && IsMapSubTypesAvailable<PType> && requires {
-      {
-        PType::max_depth_difference
-      } -> IsSameType<const typename PType::SizeType &>;
-    };
+concept IsBinaryTreeMapConfiguration = requires {
+  requires IsConfiguration<PType>;
+  requires IsMapSubTypesAvailable<PType>;
+
+  {
+    PType::max_depth_difference
+  } -> IsSameType<const typename PType::SizeType &>;
+};
 
 template <class PKeyType, class PValueType>
 struct DefaultBinaryTreeMapConfiguration : public Configuration<> {

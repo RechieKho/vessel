@@ -7,12 +7,12 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsArrayListConfiguration =
-    IsListSubTypesAvailable<PType> && IsConfiguration<PType> && requires {
-      {
-        PType::initial_capacity
-      } -> IsSameType<const typename PType::SizeType &>;
-    };
+concept IsArrayListConfiguration = requires {
+  requires IsListSubTypesAvailable<PType>;
+  requires IsConfiguration<PType>;
+  { PType::initial_capacity } -> IsSameType<const typename PType::SizeType &>;
+  requires PType::initial_capacity > 0;
+};
 
 template <class PType>
 struct DefaultArrayListConfiguration : public Configuration<> {
@@ -31,78 +31,168 @@ public:
   using ValueType = typename PConfigurationType::ValueType;
 
 private:
+  ValueType *data;
+  SizeType count;
+  SizeType capacity;
+
   class Iterator {
   public:
-    using ValueType = ValueType &;
+    using ContainerType = ArrayListImplementation;
+    using KeyType = typename ContainerType::KeyType;
+    using ValueType = typename ContainerType::ValueType &;
 
   private:
-  public:
-    auto operator++() -> Iterator & { throw UnimplementedException(); }
+    ContainerType &container;
+    KeyType index;
 
-    auto operator*() const -> ValueType { throw UnimplementedException(); }
+  public:
+    explicit Iterator(ContainerType &p_container, KeyType p_index)
+        : container(p_container), index(p_index) {}
+
+    auto operator++() -> Iterator & {
+      ++index;
+      return *this;
+    }
+
+    auto operator*() const -> ValueType { return container[index]; }
 
     auto operator==(const Iterator &p_iterator) const -> Bool {
-      throw UnimplementedException();
+      return container == p_iterator.container && index == p_iterator.index;
     }
   };
 
   class ConstantIterator {
   public:
-    using ValueType = const ValueType &;
+    using ContainerType = ArrayListImplementation;
+    using KeyType = typename ContainerType::KeyType;
+    using ValueType = const ContainerType::ValueType &;
 
   private:
-  public:
-    auto operator++() -> ConstantIterator & { throw UnimplementedException(); }
+    const ContainerType &container;
+    KeyType index;
 
-    auto operator*() const -> ValueType { throw UnimplementedException(); }
+  public:
+    explicit ConstantIterator(const ContainerType &p_container, KeyType p_index)
+        : container(p_container), index(p_index) {}
+
+    auto operator++() -> ConstantIterator & {
+      ++index;
+      return *this;
+    }
+
+    auto operator*() const -> ValueType { return container[index]; }
 
     auto operator==(const ConstantIterator &p_iterator) const -> Bool {
-      throw UnimplementedException();
+      return container == p_iterator.container && index == p_iterator.index;
     }
   };
 
+  auto release() -> void {
+    if (capacity != 0 && data != null_pointer)
+      delete[] data;
+
+    capacity = 0;
+    count = 0;
+  }
+
+  auto capture(SizeType p_capacity) -> void {
+    release();
+    if (p_capacity == 0)
+      return;
+
+    capacity = p_capacity;
+    data = new ValueType[p_capacity];
+  }
+
+  auto reserve(KeyType p_minimum_capacity) -> void {
+    if (capacity > p_minimum_capacity)
+      return;
+
+    auto new_capacity =
+        capacity == 0 ? PConfigurationType::initial_capacity : capacity;
+    while (new_capacity < p_minimum_capacity)
+      new_capacity *= 2;
+
+    auto new_list = ArrayListImplementation(new_capacity);
+    for (const auto item : *this)
+      new_list.push_back(item);
+
+    *this = move(new_list);
+  }
+
 public:
-  explicit ArrayListImplementation(
-      SizeType p_initial_capacity = PConfigurationType::initial_capacity) {
-    throw UnimplementedException();
+  explicit ArrayListImplementation(SizeType p_capacity = 0)
+      : data(null_pointer), count(0), capacity(0) {
+    capture(p_capacity);
   }
 
-  ArrayListImplementation(const ArrayListImplementation &p_list) {
-    throw UnimplementedException();
+  ArrayListImplementation(const ArrayListImplementation &p_list)
+      : ArrayListImplementation(p_list.count) {
+    for (const auto item : p_list)
+      push_back(item);
   }
 
-  ArrayListImplementation(ArrayListImplementation &&p_list) {
-    throw UnimplementedException();
+  ArrayListImplementation(ArrayListImplementation &&p_list)
+      : data(p_list.data), count(p_list.count), capacity(p_list.capacity) {
+    p_list.data = null_pointer;
+    p_list.count = 0;
+    p_list.capacity = 0;
   }
+
+  ~ArrayListImplementation() { release(); }
 
   auto operator=(const ArrayListImplementation &p_list)
       -> ArrayListImplementation & {
-    throw UnimplementedException();
+    capture(p_list.count);
+    for (const auto item : p_list)
+      push_back(item);
+
+    return *this;
   }
 
   auto
   operator=(ArrayListImplementation &&p_list) -> ArrayListImplementation & {
-    throw UnimplementedException();
+    release();
+    data = p_list.data;
+    capacity = p_list.capacity;
+    count = p_list.count;
+
+    p_list.data = null_pointer;
+    p_list.capacity = 0;
+    p_list.count = 0;
   }
 
   auto operator[](KeyType p_key) -> ValueType & {
-    throw UnimplementedException();
+    if (p_key >= count)
+      throw Exception("Out of bound.");
+    return data[p_key];
   }
 
   auto operator[](KeyType p_key) const -> const ValueType & {
-    throw UnimplementedException();
+    if (p_key >= count)
+      throw Exception("Out of bound.");
+    return data[p_key];
   }
 
   auto operator==(const ArrayListImplementation &p_list) const -> Bool {
-    throw UnimplementedException();
+    if (count != p_list.count)
+      return false;
+    // TODO: Check each element.
+    return true;
   }
 
   auto operator<(const ArrayListImplementation &p_list) const -> Bool {
-    throw UnimplementedException();
+    if (count < p_list.count)
+      return true;
+    if (count > p_list.count)
+      return false;
+    // TODO: Compare each element.
+    return true;
   }
 
   auto operator<<(ValueType p_value) -> ArrayListImplementation & {
-    throw UnimplementedException();
+    push_back(move(p_value));
+    return *this;
   }
 
   auto slice(KeyType p_start, KeyType p_end) const -> ArrayListImplementation {

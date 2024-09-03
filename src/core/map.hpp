@@ -7,35 +7,39 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsMapSubTypesAvailable =
-    requires {
-      typename PType::KeyListType;
-      typename PType::ValueListType;
-    } && IsContainerSubTypesAvailable<PType> &&
-    IsComparable<typename PType::KeyType> &&
-    IsEqualityAvailable<typename PType::ValueType> &&
-    IsList<typename PType::KeyListType> &&
-    IsSameType<typename PType::KeyListType::ValueType,
-               typename PType::KeyType> &&
-    IsList<typename PType::ValueListType> &&
-    IsSameType<typename PType::ValueListType::ValueType,
-               typename PType::ValueType>;
+concept IsMapSubTypesAvailable = requires {
+  typename PType::KeyListType;
+  typename PType::ValueListType;
+
+  requires IsContainerSubTypesAvailable<PType>;
+  requires IsComparable<typename PType::KeyType>;
+  requires IsEqualityAvailable<typename PType::ValueType>;
+  requires IsList<typename PType::KeyListType>;
+  requires IsSameType<typename PType::KeyListType::ValueType,
+                      typename PType::KeyType>;
+  requires IsList<typename PType::ValueListType>;
+  requires IsSameType<typename PType::ValueListType::ValueType,
+                      typename PType::ValueType>;
+};
 
 /// A container in which a key maps to a value.
 template <typename PType>
-concept IsMap = IsMapSubTypesAvailable<PType> && IsContainer<PType> &&
-                IsEqualityAvailable<PType> && requires {
-                  {
-                    declval<const PType>().compute_keys()
-                  } -> IsSameType<typename PType::KeyListType>;
-                  {
-                    declval<const PType>().compute_values()
-                  } -> IsSameType<typename PType::ValueListType>;
-                  {
-                    declval<const PType>().contain_key(
-                        declval<const typename PType::KeyType &>())
-                  } -> IsSameType<Bool>;
-                };
+concept IsMap = requires {
+  requires IsMapSubTypesAvailable<PType>;
+  requires IsContainer<PType>;
+  requires IsEqualityAvailable<PType>;
+
+  {
+    declval<const PType>().compute_keys()
+  } -> IsSameType<typename PType::KeyListType>;
+  {
+    declval<const PType>().compute_values()
+  } -> IsSameType<typename PType::ValueListType>;
+  {
+    declval<const PType>().contain_key(
+        declval<const typename PType::KeyType &>())
+  } -> IsSameType<Bool>;
+};
 
 } // namespace Vessel
 

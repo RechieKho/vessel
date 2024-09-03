@@ -7,24 +7,28 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsViewSubTypesAvailable =
-    requires { typename PType::ContainerType; } &&
-    IsCollectionSubTypesAvailable<PType> &&
-    IsContainer<typename PType::ContainerType> &&
-    IsSameType<typename PType::ContainerType::KeyType,
-               typename PType::KeyType> &&
-    IsSameType<typename PType::ContainerType::ValueType,
-               typename PType::ValueType>;
+concept IsViewSubTypesAvailable = requires {
+  typename PType::ContainerType;
+
+  requires IsCollectionSubTypesAvailable<PType>;
+  requires IsContainer<typename PType::ContainerType>;
+  requires IsSameType<typename PType::ContainerType::KeyType,
+                      typename PType::KeyType>;
+  requires IsSameType<typename PType::ContainerType::ValueType,
+                      typename PType::ValueType>;
+};
 
 /// An immutable, non-owning collection of data.
 template <typename PType>
-concept IsView =
-    IsViewSubTypesAvailable<PType> && IsCollection<PType> &&
-    IsCopyableFrom<typename PType::ContainerType, PType> && requires {
-      {
-        declval<const PType>()[declval<typename PType::KeyType>()]
-      } -> IsSameType<const typename PType::ValueType &>;
-    };
+concept IsView = requires {
+  requires IsViewSubTypesAvailable<PType>;
+  requires IsCollection<PType>;
+  requires IsCopyableFrom<typename PType::ContainerType, PType>;
+
+  {
+    declval<const PType>()[declval<typename PType::KeyType>()]
+  } -> IsSameType<const typename PType::ValueType &>;
+};
 
 } // namespace Vessel
 
