@@ -444,6 +444,37 @@ template <class = void> struct Configuration : public Inconstructible<> {
 };
 static_assert(IsConfiguration<Configuration<>>);
 
+template <typename PType>
+concept IsPair = requires {
+  typename PType::FirstType;
+  typename PType::SecondType;
+  requires IsSameType<decltype(declval<PType>().first),
+                      typename PType::FirstType>;
+  requires IsSameType<decltype(declval<PType>().second),
+                      typename PType::SecondType>;
+
+  {
+    PType(declval<typename PType::FirstType>(),
+          declval<typename PType::SecondType>())
+  } -> IsSameType<PType>;
+};
+
+template <typename PFirstType, typename PSecondType> class Pair {
+public:
+  using FirstType = PFirstType;
+  using SecondType = PSecondType;
+
+private:
+public:
+  FirstType first;
+  SecondType second;
+
+  explicit Pair(FirstType p_first, SecondType p_second)
+      : first(forward<FirstType>(p_first)),
+        second(forward<SecondType>(p_second)) {}
+};
+static_assert(IsPair<Pair<DummyScalar, DummyScalar>>);
+
 } // namespace Vessel
 
 #endif // DEF_HPP

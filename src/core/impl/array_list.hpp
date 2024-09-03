@@ -104,22 +104,6 @@ private:
     data = new ValueType[p_capacity];
   }
 
-  auto reserve(KeyType p_minimum_capacity) -> void {
-    if (capacity > p_minimum_capacity)
-      return;
-
-    auto new_capacity =
-        capacity == 0 ? PConfigurationType::initial_capacity : capacity;
-    while (new_capacity < p_minimum_capacity)
-      new_capacity *= 2;
-
-    auto new_list = ArrayListImplementation(new_capacity);
-    for (const auto item : *this)
-      new_list.push_back(item);
-
-    *this = move(new_list);
-  }
-
 public:
   explicit ArrayListImplementation(SizeType p_capacity = 0)
       : data(null_pointer), count(0), capacity(0) {
@@ -128,8 +112,8 @@ public:
 
   ArrayListImplementation(const ArrayListImplementation &p_list)
       : ArrayListImplementation(p_list.count) {
-    for (const auto item : p_list)
-      push_back(item);
+    for (SizeType i = 0; i < p_list.count; ++i)
+      push_back(p_list[i]);
   }
 
   ArrayListImplementation(ArrayListImplementation &&p_list)
@@ -144,8 +128,9 @@ public:
   auto operator=(const ArrayListImplementation &p_list)
       -> ArrayListImplementation & {
     capture(p_list.count);
-    for (const auto item : p_list)
-      push_back(item);
+    for (SizeType i = 0; i < p_list.count; ++i) {
+      push_back(p_list[i]);
+    }
 
     return *this;
   }
@@ -160,6 +145,8 @@ public:
     p_list.data = null_pointer;
     p_list.capacity = 0;
     p_list.count = 0;
+
+    return *this;
   }
 
   auto operator[](KeyType p_key) -> ValueType & {
@@ -177,7 +164,11 @@ public:
   auto operator==(const ArrayListImplementation &p_list) const -> Bool {
     if (count != p_list.count)
       return false;
-    // TODO: Check each element.
+
+    for (SizeType i = 0; i < count; ++i)
+      if ((*this)[i] != p_list[i])
+        return false;
+
     return true;
   }
 
@@ -186,8 +177,18 @@ public:
       return true;
     if (count > p_list.count)
       return false;
-    // TODO: Compare each element.
-    return true;
+
+    for (SizeType i = 0; i < count; ++i) {
+      const auto &self_item = (*this)[i];
+      const auto &other_item = (p_list)[i];
+
+      if (self_item < other_item)
+        return true;
+      if (self_item > other_item)
+        return false;
+    }
+
+    return false;
   }
 
   auto operator<<(ValueType p_value) -> ArrayListImplementation & {
@@ -196,36 +197,90 @@ public:
   }
 
   auto slice(KeyType p_start, KeyType p_end) const -> ArrayListImplementation {
-    throw UnimplementedException();
+    if (p_start >= count)
+      throw Exception("Out of bound.");
+    if (p_end > count)
+      throw Exception("Out of bound.");
+    if (p_start > p_end)
+      throw Exception("Starting index is bigger than ending index.");
+
+    if (p_start == p_end)
+      return ArrayListImplementation();
+
+    auto new_list = ArrayListImplementation(p_end - p_start);
+    for (SizeType i = p_start; i < p_end; ++i)
+      new_list.push_back((*this)[i]);
+
+    return new_list;
   }
 
   auto insert(KeyType p_key, ValueType p_value) -> void {
-    throw UnimplementedException();
+    if (p_key > count)
+      throw Exception("Out of bound.");
+
+    const auto new_count = count + 1;
+    auto new_capacity =
+        capacity == 0 ? PConfigurationType::initial_capacity : capacity;
+    while (new_capacity < new_count)
+      new_capacity *= 2;
+
+    if (new_capacity != capacity) {
+      auto new_data = new ValueType[new_capacity];
+      for (SizeType i = 0; i < p_key; ++i)
+        new_data[i] = move(data[i]);
+      for (SizeType i = p_key + 1; i < new_count; ++i)
+        new_data[i] = move(data[i - 1]);
+      new_data[p_key] = move(p_value);
+      delete[] data;
+      data = new_data;
+    } else {
+      for (SizeType i = new_count; i > p_key; --i)
+        data[i] = move(data[i - 1]);
+      data[p_key] = move(p_value);
+    }
+
+    count = new_count;
+    capacity = new_capacity;
   }
 
-  auto push_back(ValueType p_value) -> void { throw UnimplementedException(); }
+  auto push_back(ValueType p_value) -> void { insert(count, p_value); }
 
-  auto push_front(ValueType p_value) -> void { throw UnimplementedException(); }
+  auto push_front(ValueType p_value) -> void { insert(0, p_value); }
 
-  auto remove(KeyType p_key) -> ValueType { throw UnimplementedException(); }
+  auto remove(KeyType p_key) -> ValueType {
+    if (p_key >= count)
+      throw Exception("Out of bound.");
 
-  auto pop_back() -> ValueType { throw UnimplementedException(); }
+    const auto popped = move((*this)[p_key]);
 
-  auto pop_front() -> ValueType { throw UnimplementedException(); }
+    for (SizeType i = p_key; i < count - 1; ++i) {
+      (*this)[i] = move((*this)[i + 1]);
+    }
 
-  auto get_count() const -> SizeType { throw UnimplementedException(); }
+    count -= 1;
+    return popped;
+  }
+
+  auto pop_back() -> ValueType { return remove(count - 1); }
+
+  auto pop_front() -> ValueType { return remove(0); }
+
+  auto get_count() const -> SizeType { return count; }
 
   auto contain(const ValueType &p_value) const -> Bool {
-    throw UnimplementedException();
+    for (SizeType i = 0; i < count; ++i)
+      if ((*this)[i] == p_value)
+        return true;
+    return false;
   }
 
-  auto begin() -> Iterator { throw UnimplementedException(); };
+  auto begin() -> Iterator { return Iterator(*this, 0); };
 
-  auto end() -> Iterator { throw UnimplementedException(); };
+  auto end() -> Iterator { return Iterator(*this, count); };
 
-  auto begin() const -> ConstantIterator { throw UnimplementedException(); };
+  auto begin() const -> ConstantIterator { return ConstantIterator(*this, 0); };
 
-  auto end() const -> ConstantIterator { throw UnimplementedException(); };
+  auto end() const -> ConstantIterator { return ConstantIterator(*this, 0); };
 };
 
 template <typename PType>
