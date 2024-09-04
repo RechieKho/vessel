@@ -313,20 +313,24 @@ struct PointerType<PType *> : public CompileTimeTrue {};
 template <typename PType>
 concept IsPointerType = PointerType<PType>::value;
 
-template <typename PType>
+template <typename PFirstType, typename PSecondType = PFirstType>
 concept IsEqualityAvailable = requires {
-  { declval<const PType>() == declval<const PType>() } -> IsSameType<Bool>;
+  {
+    declval<const PFirstType>() == declval<const PSecondType>()
+  } -> IsSameType<Bool>;
 };
 
-template <typename PType>
+template <typename PFirstType, typename PSecondType = PFirstType>
 concept IsOrderingAvailable = requires {
-  { declval<const PType>() < declval<const PType>() } -> IsSameType<Bool>;
+  {
+    declval<const PFirstType>() < declval<const PSecondType>()
+  } -> IsSameType<Bool>;
 };
 
-template <typename PType>
+template <typename PFirstType, typename PSecondType = PFirstType>
 concept IsComparable = requires {
-  requires IsEqualityAvailable<PType>;
-  requires IsOrderingAvailable<PType>;
+  requires IsEqualityAvailable<PFirstType, PSecondType>;
+  requires IsOrderingAvailable<PFirstType, PSecondType>;
 };
 
 template <typename PType> auto move(PType &&p_object) {

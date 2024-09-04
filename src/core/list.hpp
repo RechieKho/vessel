@@ -1,22 +1,22 @@
 #ifndef LIST_HPP
 #define LIST_HPP
 
-#include "container.hpp"
+#include "table.hpp"
 
 namespace Vessel {
 
 template <typename PType>
 concept IsListSubTypesAvailable = requires {
-  requires IsContainerSubTypesAvailable<PType>;
+  requires IsTableSubTypesAvailable<PType>;
   requires IsComparable<typename PType::ValueType>;
   requires IsSameType<typename PType::KeyType, typename PType::SizeType>;
 };
 
-/// A container with element arranged in series.
+/// A table with element arranged in series.
 template <typename PType>
 concept IsList = requires {
   requires IsListSubTypesAvailable<PType>;
-  requires IsContainer<PType>;
+  requires IsTable<PType>;
   requires IsComparable<PType>;
 
   {

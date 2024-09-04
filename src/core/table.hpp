@@ -1,5 +1,5 @@
-#ifndef CONTAINER_HPP
-#define CONTAINER_HPP
+#ifndef TABLE_HPP
+#define TABLE_HPP
 
 #include "collection.hpp"
 #include "def.hpp"
@@ -7,17 +7,16 @@
 namespace Vessel {
 
 template <typename PType>
-concept IsContainerSubTypesAvailable =
-    requires { requires IsCollectionSubTypesAvailable<PType>; };
+concept IsTableSubTypesAvailable = requires {
+  requires IsCollectionSubTypesAvailable<PType>;
+  requires IsKeyTypeAvailable<PType>;
+};
 
-/// A mutable, owned collection of data.
+/// An indexed collection of data.
 template <typename PType>
-concept IsContainer = requires {
-  requires IsContainerSubTypesAvailable<PType>;
+concept IsTable = requires {
+  requires IsTableSubTypesAvailable<PType>;
   requires IsCollection<PType>;
-  requires IsCopyableFrom<PType>;
-  requires IsMovableFrom<PType>;
-  requires IsDefaultConstructible<PType>;
 
   {
     declval<PType>()[declval<typename PType::KeyType>()]
@@ -36,4 +35,4 @@ concept IsContainer = requires {
 
 } // namespace Vessel
 
-#endif // CONTAINER_HPP
+#endif // TABLE_HPP

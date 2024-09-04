@@ -8,7 +8,6 @@ namespace Vessel {
 template <typename PType>
 concept IsCollectionSubTypesAvailable = requires {
   requires IsValueTypeAvailable<PType>;
-  requires IsKeyTypeAvailable<PType>;
   requires IsSizeTypeAvailable<PType>;
 };
 
@@ -16,8 +15,12 @@ concept IsCollectionSubTypesAvailable = requires {
 template <typename PType>
 concept IsCollection = requires {
   requires IsCollectionSubTypesAvailable<PType>;
+  requires IsCopyableFrom<PType>;
+  requires IsMovableFrom<PType>;
+  requires IsDefaultConstructible<PType>;
   requires IsIterable<PType>;
   requires IsConstantIterable<PType>;
+
   {
     declval<const PType>().get_count()
   } -> IsSameType<typename PType::SizeType>;
