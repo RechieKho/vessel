@@ -112,7 +112,7 @@ public:
 
   ArrayListImplementation(const ArrayListImplementation &p_list)
       : ArrayListImplementation(p_list.count) {
-    for (SizeType i = 0; i < p_list.count; ++i)
+    for (KeyType i = 0; i < p_list.count; ++i)
       push_back(p_list[i]);
   }
 
@@ -128,7 +128,7 @@ public:
   auto operator=(const ArrayListImplementation &p_list)
       -> ArrayListImplementation & {
     capture(p_list.count);
-    for (SizeType i = 0; i < p_list.count; ++i) {
+    for (KeyType i = 0; i < p_list.count; ++i) {
       push_back(p_list[i]);
     }
 
@@ -165,7 +165,7 @@ public:
     if (count != p_list.count)
       return false;
 
-    for (SizeType i = 0; i < count; ++i)
+    for (KeyType i = 0; i < count; ++i)
       if ((*this)[i] != p_list[i])
         return false;
 
@@ -178,7 +178,7 @@ public:
     if (count > p_list.count)
       return false;
 
-    for (SizeType i = 0; i < count; ++i) {
+    for (KeyType i = 0; i < count; ++i) {
       const auto &self_item = (*this)[i];
       const auto &other_item = (p_list)[i];
 
@@ -208,7 +208,7 @@ public:
       return ArrayListImplementation();
 
     auto new_list = ArrayListImplementation(p_end - p_start);
-    for (SizeType i = p_start; i < p_end; ++i)
+    for (KeyType i = p_start; i < p_end; ++i)
       new_list.push_back((*this)[i]);
 
     return new_list;
@@ -226,15 +226,15 @@ public:
 
     if (new_capacity != capacity) {
       auto new_data = new ValueType[new_capacity];
-      for (SizeType i = 0; i < p_key; ++i)
+      for (KeyType i = 0; i < p_key; ++i)
         new_data[i] = move(data[i]);
-      for (SizeType i = p_key + 1; i < new_count; ++i)
+      for (KeyType i = p_key + 1; i < new_count; ++i)
         new_data[i] = move(data[i - 1]);
       new_data[p_key] = move(p_value);
       delete[] data;
       data = new_data;
     } else {
-      for (SizeType i = new_count; i > p_key; --i)
+      for (KeyType i = new_count; i > p_key; --i)
         data[i] = move(data[i - 1]);
       data[p_key] = move(p_value);
     }
@@ -253,7 +253,7 @@ public:
 
     const auto popped = move((*this)[p_key]);
 
-    for (SizeType i = p_key; i < count - 1; ++i) {
+    for (KeyType i = p_key; i < count - 1; ++i) {
       (*this)[i] = move((*this)[i + 1]);
     }
 
@@ -268,7 +268,7 @@ public:
   auto get_count() const -> SizeType { return count; }
 
   auto contain(const ValueType &p_value) const -> Bool {
-    for (SizeType i = 0; i < count; ++i)
+    for (KeyType i = 0; i < count; ++i)
       if ((*this)[i] == p_value)
         return true;
     return false;
